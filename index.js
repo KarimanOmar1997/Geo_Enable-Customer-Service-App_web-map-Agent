@@ -48,7 +48,7 @@ require([
   FeatureTable
 ) => {
   (async () => {
-    let webmapId = "f4f6642aa5514d83aae6de0ebb65057e";
+    let webmapId = "6ec29318183e49aca041c577e78cf86d";
     if (window.location.href.indexOf("?id=") > 0) {
       webmapId = window.location.href.split("?id=")[1];
     }
@@ -113,50 +113,50 @@ require([
     console.log("to get 2 :", map.layers.getItemAt(2).title);
     console.log("to get 3 :", map.layers.getItemAt(3).title);
     console.log("to get 4 :", map.layers.getItemAt(4).title);
-    console.log("to get 5 :", map.layers.getItemAt(5).title);
-    console.log("to get 6 :", map.layers.getItemAt(6).title);
-    console.log("to get 7 :", map.layers.getItemAt(7).title);
-    console.log("to get 8 :", map.layers.getItemAt(8).title);
-    console.log("to get 9 :", map.layers.getItemAt(9).title);
-    console.log("to get 10 :", map.layers.getItemAt(10).title);
-    console.log("to get 11 :", map.layers.getItemAt(11).title);
+  
     const Iraq = map.layers.getItemAt(0);
     const Governerate = map.layers.getItemAt(1);
-    const NetworkArea = map.layers.getItemAt(2);
-    const CoveragebyRSRP_85_CoveragebyRSRP_44_85 = map.layers.getItemAt(3);
-    const NetworkCoverage = map.layers.getItemAt(4);
-    const Cells = map.layers.getItemAt(5);
-    const HPSMTickets = map.layers.getItemAt(6);
-    const sitesFinal = map.layers.getItemAt(7);
-    const RFIsFC = map.layers.getItemAt(8);
-    const CCTicketsFCExportFeatures = map.layers.getItemAt(9);
-    const Cell_Site_Data_Jammer_Sites = map.layers.getItemAt(10);
-    const FiberIssues_WFL1 = map.layers.getItemAt(11);
+    const Cells = map.layers.getItemAt(2);
+    const sitesFinal = map.layers.getItemAt(3);
+    const Cell_Site_Data_Jammer_Sites = map.layers.getItemAt(4);
+    // const NetworkArea = map.layers.getItemAt(2);
+    // const CoveragebyRSRP_85_CoveragebyRSRP_44_85 = map.layers.getItemAt(3);
+    // const NetworkCoverage = map.layers.getItemAt(4);
+    // const FiberIssues_WFL1 = map.layers.getItemAt(11);
     const IraqTitle = 'Iraq'
     const GovernerateTitle = 'Governerate'
-    const NetworkAreaTitle = 'Network Area'
-    const CoveragebyRSRP_85_CoveragebyRSRP_44_85Title = 'CoveragebyRSRP_85 - CoveragebyRSRP_44_85'
-    const NetworkCoverageTitle = 'Network Coverage'
+    // const NetworkAreaTitle = 'Network Area'
+    // const CoveragebyRSRP_85_CoveragebyRSRP_44_85Title = 'CoveragebyRSRP_85 - CoveragebyRSRP_44_85'
+    // const NetworkCoverageTitle = 'Network Coverage'
     const CellsTitle = 'Cell'
-    const HPSMTicketsTitle = 'HPSM Tickets'
-    const sitesFinalTitle = 'sitesfinal'
-    const RFIsFCTitle = 'RFIs FC'
-    const CCTicketsFCExportFeaturesTitle = 'CCTicketsFC ExportFeatures'
-    const Cell_Site_Data_Jammer_SitesTitle = 'Cell_Site_Data - Jammer_Sites'
-    const FiberIssues_WFL1Title = 'FiberIssues_WFL1'
-
+    // const HPSMTicketsTitle = 'HPSM Tickets'
+    const sitesFinalTitle = 'Site'
+    // const RFIsFCTitle = 'RFIs FC'
+    // const CCTicketsFCExportFeaturesTitle = 'CCTicketsFC ExportFeatures'
+    const Cell_Site_Data_Jammer_SitesTitle = 'Jammer_Sites'
+    // const FiberIssues_WFL1Title = 'FiberIssues_WFL1'
+    
+    const CCTicketsFCExportFeatures = new FeatureLayer({
+      url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/4'
+      });
+    const RFIsFC = new FeatureLayer({
+      url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/5'
+      });
+    const HPSMTickets =  new FeatureLayer({
+    url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/7'
+    });
     const featureLayerInterference = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Cell_Site_Data/FeatureServer/6"
     });
-
+    
     const featureLayerNMSIncident = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/NMS_Incident/FeatureServer/4"
     });
-
+    
     const featureLayerMaintenanceSiteOperation = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_Cell_V4/FeatureServer/4"
     });
-
+    
     const featureLayerOutagesData = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_Cell_V4/FeatureServer/5"
     });
@@ -291,21 +291,6 @@ require([
       ]
     };
 
-    view.when().then(() => {
-
-      // Sort features by average traffic count
-      // large symbols on top - small symbols on the bottom
-      RFIsFC.orderBy = [{
-        field: "Creation_Date_Time",
-        order: "descending"  // "descending" | "ascending"
-      }];
-      CCTicketsFCExportFeatures.orderBy = [{
-        field: "problem_time",
-        order: "descending"  // "descending" | "ascending"
-      }];
-
-
-    });
 
     document.getElementById("coverageStatusButton").addEventListener("click", function () {
       Cells.renderer = coverageStatusRenderer;
@@ -407,181 +392,181 @@ require([
         },
       ]
     }
-    HPSMTickets.popupTemplate = {
-      title: "{phone_number}",
-      outFields: ["*"],
-      returnGeometry: true,
-      fieldInfos: [
-        {
-          fieldName: "im_id",
-          label: "Im ID:",
-        },
-        {
-          fieldName: "phone_number",
-          label: "Phone Number:"
-        },
-        {
-          fieldName: "sd_id",
-          label: "SD ID:"
-        },
-        {
-          fieldName: "sd_open_time",
-          label: "SD Open Time:"
-        },
-        {
-          fieldName: "sd_opened_by",
-          label: "SD Opened By:"
-        }
-        ,
-        {
-          fieldName: "sd",
-          label: "SD:"
-        }
-        ,
-        {
-          fieldName: "sd_status",
-          label: "SD Status:"
-        }
-        ,
-        {
-          fieldName: "area",
-          label: "Area:"
-        }
-        ,
-        {
-          fieldName: "subcategory",
-          label: "Subcategory:"
-        }
-        ,
-        {
-          fieldName: "sd_close_time",
-          label: "SD Close Time:"
-        }
-        ,
-        {
-          fieldName: "sd_resolution_time",
-          label: "SD Resolution Time:"
-        }
-        ,
-        {
-          fieldName: "general_outage",
-          label: "General Outage"
-        }
-        ,
-        {
-          fieldName: "sla_status",
-          label: "Sla Status:"
-        }
-        ,
-        {
-          fieldName: "affected_service",
-          label: "Affected Service:"
-        }
-        ,
-        {
-          fieldName: "gouvernorate",
-          label: "Gouvernorate:"
-        }
-        ,
-        {
-          fieldName: "resolution",
-          label: "Resolution:"
-        }
-        ,
-        {
-          fieldName: "resolution_code",
-          label: "Resolution Code:"
-        }
-        ,
-        {
-          fieldName: "cell_id",
-          label: "Cell ID:"
-        }
-        ,
-        {
-          fieldName: "cell_name",
-          label: "Cell Name:"
-        }
-        ,
-        {
-          fieldName: "siteid",
-          label: "Siteid:"
-        }
-        ,
-        {
-          fieldName: "customer_segment",
-          label: "Customer Segment:"
-        }
-        ,
-        {
-          fieldName: "sitename",
-          label: "Sitename:"
-        }
-        ,
-        {
-          fieldName: "reopened",
-          label: "Reopened:"
-        }
-        ,
-        {
-          fieldName: "resolved_by",
-          label: "Resolved by:"
-        }
-        ,
-        {
-          fieldName: "region",
-          label: "Region:"
-        }
-        ,
-        {
-          fieldName: "resolved_by",
-          label: "Resolved By:"
-        }
-        ,
-        {
-          fieldName: "expected_resolution_date",
-          label: "Expected Resolution Date:"
-        }
-      ],
-      content: [
-        // Add FieldContent to popup template.
-        {
-          type: "fields"
-        },
-        // Create RelationshipContent with the relationship between
-        // the units and fires.
-        {
-          type: "relationship",
-          // The numeric ID value for the defined relationship on the service.
-          // This can be found on the service.
-          relationshipId: 4,
-          description: "",
-          // Display two related fire features in the list of related features.
-          displayCount: 1,
-          title: "Maintenance Site Operation Data",
-          // Order the related features by the 'GIS_ACRES' in descending order.
-          orderByFields: {
-            field: "site_id",
-            order: "desc"
-          }
-        },
-        // // Create RelationshipContent with the relationship between
-        // // the units and wildfire protection facility statistics table.
-        {
-          type: "relationship",
-          relationshipId: 5,
-          description: "",
-          // Display only the one unit
-          displayCount: 1,
-          title: "Outages Data",
-          // Order list of related records by the 'NAME' field in ascending order.
-          orderByFields: {
-            field: "site_id",
-            order: "asc"
-          }
-        },
-      ]
-    }
+    // HPSMTickets.popupTemplate = {
+    //   title: "{phone_number}",
+    //   outFields: ["*"],
+    //   returnGeometry: true,
+    //   fieldInfos: [
+    //     {
+    //       fieldName: "im_id",
+    //       label: "Im ID:",
+    //     },
+    //     {
+    //       fieldName: "phone_number",
+    //       label: "Phone Number:"
+    //     },
+    //     {
+    //       fieldName: "sd_id",
+    //       label: "SD ID:"
+    //     },
+    //     {
+    //       fieldName: "sd_open_time",
+    //       label: "SD Open Time:"
+    //     },
+    //     {
+    //       fieldName: "sd_opened_by",
+    //       label: "SD Opened By:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "sd",
+    //       label: "SD:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "sd_status",
+    //       label: "SD Status:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "area",
+    //       label: "Area:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "subcategory",
+    //       label: "Subcategory:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "sd_close_time",
+    //       label: "SD Close Time:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "sd_resolution_time",
+    //       label: "SD Resolution Time:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "general_outage",
+    //       label: "General Outage"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "sla_status",
+    //       label: "Sla Status:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "affected_service",
+    //       label: "Affected Service:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "gouvernorate",
+    //       label: "Gouvernorate:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "resolution",
+    //       label: "Resolution:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "resolution_code",
+    //       label: "Resolution Code:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "cell_id",
+    //       label: "Cell ID:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "cell_name",
+    //       label: "Cell Name:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "siteid",
+    //       label: "Siteid:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "customer_segment",
+    //       label: "Customer Segment:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "sitename",
+    //       label: "Sitename:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "reopened",
+    //       label: "Reopened:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "resolved_by",
+    //       label: "Resolved by:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "region",
+    //       label: "Region:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "resolved_by",
+    //       label: "Resolved By:"
+    //     }
+    //     ,
+    //     {
+    //       fieldName: "expected_resolution_date",
+    //       label: "Expected Resolution Date:"
+    //     }
+    //   ],
+    //   content: [
+    //     // Add FieldContent to popup template.
+    //     {
+    //       type: "fields"
+    //     },
+    //     // Create RelationshipContent with the relationship between
+    //     // the units and fires.
+    //     {
+    //       type: "relationship",
+    //       // The numeric ID value for the defined relationship on the service.
+    //       // This can be found on the service.
+    //       relationshipId: 4,
+    //       description: "",
+    //       // Display two related fire features in the list of related features.
+    //       displayCount: 1,
+    //       title: "Maintenance Site Operation Data",
+    //       // Order the related features by the 'GIS_ACRES' in descending order.
+    //       orderByFields: {
+    //         field: "site_id",
+    //         order: "desc"
+    //       }
+    //     },
+    //     // // Create RelationshipContent with the relationship between
+    //     // // the units and wildfire protection facility statistics table.
+    //     {
+    //       type: "relationship",
+    //       relationshipId: 5,
+    //       description: "",
+    //       // Display only the one unit
+    //       displayCount: 1,
+    //       title: "Outages Data",
+    //       // Order list of related records by the 'NAME' field in ascending order.
+    //       orderByFields: {
+    //         field: "site_id",
+    //         order: "asc"
+    //       }
+    //     },
+    //   ]
+    // }
     // map.layers.getItemAt(5).popupTemplate = {
     //   title: "{site_name}",
     //   outFields: ["*"],
@@ -776,7 +761,7 @@ require([
       featureTableCCTickets.highlightIds.removeAll();
       featureTableJammerSites.highlightIds.removeAll();
       featureTableSites.highlightIds.removeAll();
-      featureTableNetworkCoverage.highlightIds.removeAll();
+      // featureTableNetworkCoverage.highlightIds.removeAll();
       featureTableCells.highlightIds.removeAll();
       featureTableOutagesData.highlightIds.removeAll();
 
@@ -809,23 +794,23 @@ require([
           name: "Sites",
           placeholder: "example: BAG0400"
         },
-        {
-          layer: HPSMTickets,
-          searchFields: ["phone_number"],
-          displayField: "phone_number",
-          exactMatch: false,
-          // outFields: ["*"],
-          name: "CCTicketsFC",
-          placeholder: "example: 010123456789"
-        },
-        {
-          name: "ArcGIS World Geocoding Service",
-          placeholder: "example: Nuuk, GRL",
-          apiKey: "AAPK8439fc9a325c4593a3234a4fbafe73caXK2STpUubI24-8zi9egsX2fCBrOdoOUY5qDXEAIHWamfxipss0ffj3zCLo7amIE6"
-          ,
-          singleLineFieldName: "SingleLine",
-          url: "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer"
-        }
+        // {
+        //   layer: HPSMTickets,
+        //   searchFields: ["phone_number"],
+        //   displayField: "phone_number",
+        //   exactMatch: false,
+        //   // outFields: ["*"],
+        //   name: "CCTicketsFC",
+        //   placeholder: "example: 010123456789"
+        // },
+        // {
+        //   name: "ArcGIS World Geocoding Service",
+        //   placeholder: "example: Nuuk, GRL",
+        //   apiKey: "AAPK8439fc9a325c4593a3234a4fbafe73caXK2STpUubI24-8zi9egsX2fCBrOdoOUY5qDXEAIHWamfxipss0ffj3zCLo7amIE6"
+        //   ,
+        //   singleLineFieldName: "SingleLine",
+        //   url: "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer"
+        // }
       ]
     });
 
@@ -959,35 +944,35 @@ require([
     view.ui.add(compassWidget, "top-right");
 
 
-    const typeSelect = document.getElementById("type-select");
+    // const typeSelect = document.getElementById("type-select");
 
-    typeSelect.addEventListener("change", async () => {
-      const value = typeSelect.value;
-      // const layerHPSM = map.layers.getItemAt(6);
-      // const CCTicketsFCExportFeatures = map.layers.getItemAt(9);
-      await HPSMTickets.load();
-      await CCTicketsFCExportFeatures.load();
-      // Create an array of layerViews to be able to highlight selected features.
-      if (HPSMTickets.type === "feature") {
-        // const layerView = await view.whenLayerView(layer);
+    // typeSelect.addEventListener("change", async () => {
+    //   const value = typeSelect.value;
+    //   // const layerHPSM = map.layers.getItemAt(6);
+    //   // const CCTicketsFCExportFeatures = map.layers.getItemAt(9);
+    //   await HPSMTickets.load();
+    //   await CCTicketsFCExportFeatures.load();
+    //   // Create an array of layerViews to be able to highlight selected features.
+    //   if (HPSMTickets.type === "feature") {
+    //     // const layerView = await view.whenLayerView(layer);
 
-        HPSMTickets.definitionExpression =
-          value === "all"
-            ? null
-            : `sd_status = '${value}'`
+    //     HPSMTickets.definitionExpression =
+    //       value === "all"
+    //         ? null
+    //         : `sd_status = '${value}'`
 
-      }
-      if (CCTicketsFCExportFeatures.type === "feature") {
-        // const layerViewCCTicketsFC = await view.whenLayerView(layerCCTicketsFC);
+    //   }
+    //   if (CCTicketsFCExportFeatures.type === "feature") {
+    //     // const layerViewCCTicketsFC = await view.whenLayerView(layerCCTicketsFC);
 
-        CCTicketsFCExportFeatures.definitionExpression =
-          value === "all"
-            ? null
-            : `sd_status = '${value}'`
+    //     CCTicketsFCExportFeatures.definitionExpression =
+    //       value === "all"
+    //         ? null
+    //         : `sd_status = '${value}'`
 
-      }
-      // });
-    });
+    //   }
+    //   // });
+    // });
 
     const SearchInputAffectedService = document.getElementById("SearchInputAffectedService");
     SearchInputAffectedService.addEventListener("change", async () => {
@@ -1148,20 +1133,6 @@ require([
         }
       }
     };
-
-    // const NetworkCoverageFeatureLayer = new FeatureLayer({
-    //   url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_Cell_V4/FeatureServer/2",
-    // });
-
-
-    // const CCTicketsFCExportFeaturesFeatureLayer = new FeatureLayer({
-    //   url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/CCTickets_RFI/FeatureServer/0",
-    // });
-
-    const RFIsFCFeatureLayer = new FeatureLayer({
-      url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/CCTickets_RFI/FeatureServer/1",
-    });
-
 
     function getDitalls(point) {
 
@@ -1608,12 +1579,12 @@ require([
     // const layerCCTickets = map.layers.getItemAt(9)
 
     // console.log(layer);
-    await HPSMTickets.load();
+    // await HPSMTickets.load();
     await RFIsFC.load();
     await CCTicketsFCExportFeatures.load();
-    let layerViewHPSM = await view.whenLayerView(HPSMTickets);
+    // let layerViewHPSM = await view.whenLayerView(HPSMTickets);
     // let layerRFIView = await view.whenLayerView(RFIsFC);
-    let layerCCTicketsView = await view.whenLayerView(CCTicketsFCExportFeatures);
+    // let layerCCTicketsView = await view.whenLayerView(CCTicketsFCExportFeatures);
 
 
     // prepare data for total Tickets by time of day chart
@@ -1923,9 +1894,9 @@ require([
       console.log(twentyFourHoursAgo.toISOString());
       // AND cgi = 'BAG0400'
       if (cgi) {
-        query.where = `sd_open_time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'`;
+        query.where = `problem_time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'`;
       } else {
-        query.where = `sd_open_time >= '${twentyFourHoursAgo.toISOString()}'`;
+        query.where = `problem_time >= '${twentyFourHoursAgo.toISOString()}'`;
       }
       query.outStatistics = [
         {
@@ -1946,10 +1917,10 @@ require([
       //======================================================= by top 10 records ===================================
 
       const queryParams = {
-        where: cgi ? `sd_open_time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'` : `sd_open_time >= '${twentyFourHoursAgo.toISOString()}'`, // Specify your query parameters
+        where: cgi ? `problem_time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'` : `sd_open_time >= '${twentyFourHoursAgo.toISOString()}'`, // Specify your query parameters
         outFields: '*', // Specify the fields you want to retrieve
         returnGeometry: true,
-        orderByFields: "sd_open_time DESC",
+        orderByFields: "problem_time DESC",
         // resultRecordCount: 1,
       };
       let resultQuery = await CCTicketsFCExportFeatures.queryFeatures(queryParams);
@@ -2015,8 +1986,8 @@ require([
         // clear the feature effect and reset the previous index
         if (previouslySelectedBarIndex === idx) {
           previouslySelectedBarIndex = null;
-          layerViewHPSM.featureEffect = undefined;
-          layerCCTicketsView.featureEffect = undefined;
+          // layerViewHPSM.featureEffect = undefined;
+          // layerCCTicketsView.featureEffect = undefined;
 
           if (dayDistributionChart) {
             dayDistributionChart.data.datasets[0].data = [];
@@ -2066,18 +2037,18 @@ require([
           const title = "Tickets by hours on " + label;
           // dayDistributionStats(where, "extract(hour from sd_open_time)", title);
         }
-        layerViewHPSM.featureEffect = {
-          filter: {
-            where
-          },
-          excludedEffect: "blur(2px) opacity(0) grayscale(0.2)"
-        };
-        layerCCTicketsView.featureEffect = {
-          filter: {
-            where
-          },
-          excludedEffect: "blur(2px) opacity(0) grayscale(0.2)"
-        };
+        // layerViewHPSM.featureEffect = {
+        //   filter: {
+        //     where
+        //   },
+        //   excludedEffect: "blur(2px) opacity(0) grayscale(0.2)"
+        // };
+        // layerCCTicketsView.featureEffect = {
+        //   filter: {
+        //     where
+        //   },
+        //   excludedEffect: "blur(2px) opacity(0) grayscale(0.2)"
+        // };
       }
     }
 
@@ -2124,8 +2095,8 @@ require([
       for (let chart of charts) {
         // changeBarColor(chart, previouslySelectedBarIndex, "#007AC2");
       }
-      layerCCTicketsView.featureEffect = undefined;
-      layerViewHPSM.featureEffect = undefined;
+      // layerCCTicketsView.featureEffect = undefined;
+      // layerViewHPSM.featureEffect = undefined;
       previouslySelectedBarIndex = null;
       // dayChartBreakDownBlock.style.display = "none";
       chartDay.style.display = "none";
@@ -2356,24 +2327,24 @@ require([
       container: document.getElementById("tableDiv-OutagesData")
     });
 
-    const featureTableNetworkCoverage = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: NetworkCoverage,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
+    // const featureTableNetworkCoverage = new FeatureTable({
+    //   view: view, // Required for feature highlight to work
+    //   layer: NetworkCoverage,
+    //   visibleElements: {
+    //     // Autocast to VisibleElements
+    //     menuItems: {
+    //       clearSelection: true,
 
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: true
-        }
-      },
+    //       refreshData: true,
+    //       toggleColumns: true,
+    //       selectedRecordsShowAllToggle: true,
+    //       selectedRecordsShowSelectedToggle: true,
+    //       zoomToSelection: true
+    //     }
+    //   },
 
-      container: document.getElementById("tableDiv-NetworkCoverage")
-    });
+    //   container: document.getElementById("tableDiv-NetworkCoverage")
+    // });
 
     const featureTableRFIsFC = new FeatureTable({
       view: view, // Required for feature highlight to work
@@ -2957,7 +2928,7 @@ require([
         // Filter out and show only the visible features in the feature table.
         featureTableSites.filterGeometry = view.extent;
         featureTableHPSMTickets.filterGeometry = view.extent;
-        featureTableNetworkCoverage.filterGeometry = view.extent;
+        // featureTableNetworkCoverage.filterGeometry = view.extent;
         featureTableRFIsFC.filterGeometry = view.extent;
         featureTableCCTickets.filterGeometry = view.extent;
         featureTableJammerSites.filterGeometry = view.extent;
@@ -2975,7 +2946,7 @@ require([
       handles.removeAll();
       featureTableHPSMTickets.highlightIds.removeAll();
       featureTableSites.highlightIds.removeAll();
-      featureTableNetworkCoverage.highlightIds.removeAll();
+      // featureTableNetworkCoverage.highlightIds.removeAll();
       featureTableRFIsFC.highlightIds.removeAll();
       featureTableCCTickets.highlightIds.removeAll();
       featureTableJammerSites.highlightIds.removeAll();
@@ -2994,61 +2965,61 @@ require([
             result.graphic.layer &&
             result.graphic.layer === sitesFinal
         }
-        else if (result.graphic.layer === HPSMTickets) {
-          return result.graphic &&
-            result.graphic.layer &&
-            result.graphic.layer === HPSMTickets
+        // else if (result.graphic.layer === HPSMTickets) {
+        //   return result.graphic &&
+        //     result.graphic.layer &&
+        //     result.graphic.layer === HPSMTickets
 
-        }
-        else if (result.graphic.layer === RFIsFC) {
-          return result.graphic &&
-            result.graphic.layer &&
-            result.graphic.layer === RFIsFC
+        // }
+        // else if (result.graphic.layer === RFIsFC) {
+        //   return result.graphic &&
+        //     result.graphic.layer &&
+        //     result.graphic.layer === RFIsFC
 
-        }
+        // }
         else if (result.graphic.layer === Cell_Site_Data_Jammer_Sites) {
           return result.graphic &&
             result.graphic.layer &&
             result.graphic.layer === Cell_Site_Data_Jammer_Sites
 
         }
-        else if (result.graphic.layer === NetworkCoverage) {
-          return result.graphic &&
-            result.graphic.layer &&
-            result.graphic.layer === NetworkCoverage
+        // else if (result.graphic.layer === NetworkCoverage) {
+        //   return result.graphic &&
+        //     result.graphic.layer &&
+        //     result.graphic.layer === NetworkCoverage
 
-        }
-        else if (result.graphic.layer === CCTicketsFCExportFeatures) {
-          return result.graphic &&
-            result.graphic.layer &&
-            result.graphic.layer === CCTicketsFCExportFeatures
+        // }
+        // else if (result.graphic.layer === CCTicketsFCExportFeatures) {
+        //   return result.graphic &&
+        //     result.graphic.layer &&
+        //     result.graphic.layer === CCTicketsFCExportFeatures
 
-        }
+        // }
         else if (result.graphic.layer === Cells) {
           return result.graphic &&
             result.graphic.layer &&
             result.graphic.layer === Cells
 
         }
-        else if (result.graphic.layer === FiberIssues_WFL1) {
-          return result.graphic &&
-            result.graphic.layer &&
-            result.graphic.layer === FiberIssues_WFL1
+        // else if (result.graphic.layer === FiberIssues_WFL1) {
+        //   return result.graphic &&
+        //     result.graphic.layer &&
+        //     result.graphic.layer === FiberIssues_WFL1
 
-        }
+        // }
 
-        else if (result.graphic.layer === CoveragebyRSRP_85_CoveragebyRSRP_44_85) {
-          return result.graphic &&
-            result.graphic.layer &&
-            result.graphic.layer === CoveragebyRSRP_85_CoveragebyRSRP_44_85
+        // else if (result.graphic.layer === CoveragebyRSRP_85_CoveragebyRSRP_44_85) {
+        //   return result.graphic &&
+        //     result.graphic.layer &&
+        //     result.graphic.layer === CoveragebyRSRP_85_CoveragebyRSRP_44_85
 
-        }
-        else if (result.graphic.layer === NetworkArea) {
-          return result.graphic &&
-            result.graphic.layer &&
-            result.graphic.layer === NetworkArea
+        // }
+        // else if (result.graphic.layer === NetworkArea) {
+        //   return result.graphic &&
+        //     result.graphic.layer &&
+        //     result.graphic.layer === NetworkArea
 
-        }
+        // }
         else if (result.graphic.layer === Governerate) {
           return result.graphic &&
             result.graphic.layer &&
@@ -3075,18 +3046,18 @@ require([
             // Add this feature to the featureTableSites highlightIds collection
           }
         }
-        else if (candidate.layer.title == HPSMTicketsTitle) {
+        // else if (candidate.layer.title == HPSMTicketsTitle) {
 
 
-          if (featureTableHPSMTickets.highlightIds.includes(objectId)) {
-            // Remove feature from current selection if feature
-            // is already added to highlightIds collection
-            featureTableHPSMTickets.highlightIds.remove(objectId);
-          } else {
-            // Add this feature to the featureTableHPSMTickets highlightIds collection
-            featureTableHPSMTickets.highlightIds.add(objectId);
-          }
-        }
+        //   if (featureTableHPSMTickets.highlightIds.includes(objectId)) {
+        //     // Remove feature from current selection if feature
+        //     // is already added to highlightIds collection
+        //     featureTableHPSMTickets.highlightIds.remove(objectId);
+        //   } else {
+            
+        //     featureTableHPSMTickets.highlightIds.add(objectId);
+        //   }
+        // }
         else if (candidate.layer.title == CellsTitle) {
 
 
@@ -3095,46 +3066,46 @@ require([
             // is already added to highlightIds collection
             featureTableCells.highlightIds.remove(objectId);
           } else {
-            // Add this feature to the featureTableHPSMTickets highlightIds collection
+            
             featureTableCells.highlightIds.add(objectId);
           }
         }
-        else if (candidate.layer.title == NetworkCoverageTitle) {
+        // else if (candidate.layer.title == NetworkCoverageTitle) {
 
 
-          if (featureTableNetworkCoverage.highlightIds.includes(objectId)) {
-            // Remove feature from current selection if feature
-            // is already added to highlightIds collection
-            featureTableNetworkCoverage.highlightIds.remove(objectId);
-          } else {
-            // Add this feature to the featureTableHPSMTickets highlightIds collection
-            featureTableNetworkCoverage.highlightIds.add(objectId);
-          }
-        }
-        else if (candidate.layer.title == RFIsFCTitle) {
+        //   if (featureTableNetworkCoverage.highlightIds.includes(objectId)) {
+        //     // Remove feature from current selection if feature
+        //     // is already added to highlightIds collection
+        //     featureTableNetworkCoverage.highlightIds.remove(objectId);
+        //   } else {
+        //     
+        //     featureTableNetworkCoverage.highlightIds.add(objectId);
+        //   }
+        // }
+        // else if (candidate.layer.title == RFIsFCTitle) {
 
 
-          if (featureTableRFIsFC.highlightIds.includes(objectId)) {
-            // Remove feature from current selection if feature
-            // is already added to highlightIds collection
-            featureTableRFIsFC.highlightIds.remove(objectId);
-          } else {
-            // Add this feature to the featureTableHPSMTickets highlightIds collection
-            featureTableRFIsFC.highlightIds.add(objectId);
-          }
-        }
-        else if (candidate.layer.title == CCTicketsFCExportFeaturesTitle) {
+        //   if (featureTableRFIsFC.highlightIds.includes(objectId)) {
+        //     // Remove feature from current selection if feature
+        //     // is already added to highlightIds collection
+        //     featureTableRFIsFC.highlightIds.remove(objectId);
+        //   } else {
+            
+        //     featureTableRFIsFC.highlightIds.add(objectId);
+        //   }
+        // }
+        // else if (candidate.layer.title == CCTicketsFCExportFeaturesTitle) {
 
 
-          if (featureTableCCTickets.highlightIds.includes(objectId)) {
-            // Remove feature from current selection if feature
-            // is already added to highlightIds collection
-            featureTableCCTickets.highlightIds.remove(objectId);
-          } else {
-            // Add this feature to the featureTableHPSMTickets highlightIds collection
-            featureTableCCTickets.highlightIds.add(objectId);
-          }
-        }
+        //   if (featureTableCCTickets.highlightIds.includes(objectId)) {
+        //     // Remove feature from current selection if feature
+        //     // is already added to highlightIds collection
+        //     featureTableCCTickets.highlightIds.remove(objectId);
+        //   } else {
+            
+        //     featureTableCCTickets.highlightIds.add(objectId);
+        //   }
+        // }
         else if (candidate.layer.title == Cell_Site_Data_Jammer_SitesTitle) {
 
 
@@ -3143,7 +3114,7 @@ require([
             // is already added to highlightIds collection
             featureTableJammerSites.highlightIds.remove(objectId);
           } else {
-            // Add this feature to the featureTableHPSMTickets highlightIds collection
+            
             featureTableJammerSites.highlightIds.add(objectId);
           }
         }
@@ -3156,33 +3127,33 @@ require([
             });
           }
         }
-        else if (candidate.layer.title == CoveragebyRSRP_85_CoveragebyRSRP_44_85Title) {
-          if (candidate.graphic.layer.type === "feature") {
-            layerViews.forEach((layerView) => {
-              if (candidate.graphic.layer.title === layerView.layer.title) {
-                handles.add(layerView.highlight(candidate.graphic));
-              }
-            });
-          }
-        }
-        else if (candidate.layer.title == NetworkAreaTitle) {
-          if (candidate.graphic.layer.type === "feature") {
-            layerViews.forEach((layerView) => {
-              if (candidate.graphic.layer.title === layerView.layer.title) {
-                handles.add(layerView.highlight(candidate.graphic));
-              }
-            });
-          }
-        }
-        else if (candidate.layer.title == FiberIssues_WFL1Title) {
-          if (candidate.graphic.layer.type === "feature") {
-            layerViews.forEach((layerView) => {
-              if (candidate.graphic.layer.title === layerView.layer.title) {
-                handles.add(layerView.highlight(candidate.graphic));
-              }
-            });
-          }
-        }
+        // else if (candidate.layer.title == CoveragebyRSRP_85_CoveragebyRSRP_44_85Title) {
+        //   if (candidate.graphic.layer.type === "feature") {
+        //     layerViews.forEach((layerView) => {
+        //       if (candidate.graphic.layer.title === layerView.layer.title) {
+        //         handles.add(layerView.highlight(candidate.graphic));
+        //       }
+        //     });
+        //   }
+        // }
+        // else if (candidate.layer.title == NetworkAreaTitle) {
+        //   if (candidate.graphic.layer.type === "feature") {
+        //     layerViews.forEach((layerView) => {
+        //       if (candidate.graphic.layer.title === layerView.layer.title) {
+        //         handles.add(layerView.highlight(candidate.graphic));
+        //       }
+        //     });
+        //   }
+        // }
+        // else if (candidate.layer.title == FiberIssues_WFL1Title) {
+        //   if (candidate.graphic.layer.type === "feature") {
+        //     layerViews.forEach((layerView) => {
+        //       if (candidate.graphic.layer.title === layerView.layer.title) {
+        //         handles.add(layerView.highlight(candidate.graphic));
+        //       }
+        //     });
+        //   }
+        // }
       }
     });
 
@@ -3401,26 +3372,26 @@ require([
         });
       }
     );
-    reactiveUtils.watch(
-      () => featureTableNetworkCoverage.highlightIds.length,
-      (highlightIdsCount) => {
-        // Iterate through the filters within the table.
-        // If the active filter is "Show selection",
-        // changes made to highlightIds (adding/removing)
-        // are reflected.
+    // reactiveUtils.watch(
+    //   () => featureTableNetworkCoverage.highlightIds.length,
+    //   (highlightIdsCount) => {
+    //     // Iterate through the filters within the table.
+    //     // If the active filter is "Show selection",
+    //     // changes made to highlightIds (adding/removing)
+    //     // are reflected.
 
-        featureTableNetworkCoverage.viewModel.activeFilters.forEach((filter) => {
-          if (filter.type === "selection") {
-            selectionIdCount = filter.objectIds.length; // the filtered selection's id count
-            // Check that the filter selection count is equal to the
-            // highlightIds collection count. If not, update filter selection.
-            if (selectionIdCount !== highlightIdsCount) {
-              featureTableNetworkCoverage.filterBySelection();
-            }
-          }
-        });
-      }
-    );
+    //     featureTableNetworkCoverage.viewModel.activeFilters.forEach((filter) => {
+    //       if (filter.type === "selection") {
+    //         selectionIdCount = filter.objectIds.length; // the filtered selection's id count
+    //         // Check that the filter selection count is equal to the
+    //         // highlightIds collection count. If not, update filter selection.
+    //         if (selectionIdCount !== highlightIdsCount) {
+    //           featureTableNetworkCoverage.filterBySelection();
+    //         }
+    //       }
+    //     });
+    //   }
+    // );
     reactiveUtils.watch(
       () => featureTableRFIsFC.highlightIds.length,
       (highlightIdsCount) => {

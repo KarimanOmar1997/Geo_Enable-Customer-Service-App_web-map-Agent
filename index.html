@@ -1,604 +1,675 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport"
-          content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-        <title>Save a web map | Sample | ArcGIS Maps SDK for JavaScript 4.28</title>
-        <script src="chart.main.js"></script>
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script> -->
-        <link href="./bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-        
-        <link rel="stylesheet" type="text/css" href="calcite.css" />
-        <!-- <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.9.2/calcite.css" /> -->
-        <link rel="stylesheet" href="./arcgis_js_v428_api/arcgis_js_api/javascript/4.28/esri/themes/light/main.css" />
-        <style>
-          html,
-          body,
-          #viewDiv {
-            padding: 0;
-            margin: 0;
-            height: 100%;
-            width: 100%;
-          }
-    
-          #sidebarDiv {
-            width: 240px;
-            padding: 10px;
-            height: 200px;
-          }
-    
-          #overlayDiv {
-            z-index: 1;
-            position: absolute;
-            margin: auto auto;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            width: 300px;
-            height: 240px;
-            padding: 10px;
-            background-color: white;
-            border: 1px solid grey;
-            visibility: hidden;
-          }
-          
-          calcite-panel {
-            overflow: auto!important;
-          }
-          .esri-feature__title {
-        background-color: #e6e6e6;
-        padding: 0.25em;
-      }
 
-      .esri-feature__size-container {
-        background: #f5f5f5;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Save a web map | Sample | ArcGIS Maps SDK for JavaScript 4.28</title>
+  <script src="chart.main.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script> -->
+  <link href="./bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
-          calcite-shell{
-            position: relative;
-            /* height: 100vh; */
-          }
-          .nav-pills .nav-link.active{
-            background-color: #ffc720!important;
-            color: black!important;
-          }
-          .tab-content>.active {
-              display: flex;
-          }
-          #topbar {
-            background: #fff;
-            padding: 10px;
-          }
-          #classification {
-            background: #fff;
-            padding: 10px;
-          }
+  <link rel="stylesheet" type="text/css" href="calcite.css" />
+  <!-- <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.9.2/calcite.css" /> -->
+  <link rel="stylesheet" href="./arcgis_js_v428_api/arcgis_js_api/javascript/4.28/esri/themes/light/main.css" />
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
 
-          .action-button {
-            font-size: 16px;
-            background-color: transparent;
-            border: 1px solid #d3d3d3;
-            color: #6e6e6e;
-            height: 32px;
-            width: 32px;
-            text-align: center;
-            box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
-          }
-          .action-buttonClassification {
-            font-size: 16px;
-            background-color: transparent;
-            border: 1px solid #d3d3d3;
-            color: #6e6e6e;
-           
-            text-align: center;
-            box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
-          }
+    #sidebarDiv {
+      width: 240px;
+      padding: 10px;
+      height: 200px;
+    }
 
-          .action-button:hover , .action-buttonClassification:hover {
-            background: #f3f3f3;
-            color: #000;
-          }
-          #applicationDiv {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          overflow: auto;
-      }
+    #overlayDiv {
+      z-index: 1;
+      position: absolute;
+      margin: auto auto;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 300px;
+      height: 240px;
+      padding: 10px;
+      background-color: white;
+      border: 1px solid grey;
+      visibility: hidden;
+    }
 
-      #rightPanel {
-        max-height: 98%;
-      }
+    calcite-panel {
+      overflow: auto !important;
+    }
+
+    .esri-feature__title {
+      background-color: #e6e6e6;
+      padding: 0.25em;
+    }
+
+    .esri-feature__size-container {
+      background: #f5f5f5;
+    }
+
+    calcite-shell {
+      position: relative;
+      /* height: 100vh; */
+    }
+
+    .nav-pills .nav-link.active {
+      background-color: #ffc720 !important;
+      color: black !important;
+    }
+
+    .tab-content>.active {
+      display: flex;
+    }
+
+    #topbar {
+      background: #fff;
+      padding: 10px;
+    }
+
+    #classification {
+      background: #fff;
+      padding: 10px;
+    }
+
+    .action-button {
+      font-size: 16px;
+      background-color: transparent;
+      border: 1px solid #d3d3d3;
+      color: #6e6e6e;
+      height: 32px;
+      width: 32px;
+      text-align: center;
+      box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+    }
+
+    .action-buttonClassification {
+      font-size: 16px;
+      background-color: transparent;
+      border: 1px solid #d3d3d3;
+      color: #6e6e6e;
+
+      text-align: center;
+      box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+    }
+
+    .action-button:hover,
+    .action-buttonClassification:hover {
+      background: #f3f3f3;
+      color: #000;
+    }
+
+    #applicationDiv {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+    }
+
+    #rightPanel {
+      max-height: 98%;
+    }
 
 
-      calcite-shell-panel {
-        --calcite-shell-panel-min-width: 420px;
-        --calcite-shell-panel-width: 420px;
-        --calcite-shell-panel-max-width: 80%;
-      }
+    calcite-shell-panel {
+      --calcite-shell-panel-min-width: 420px;
+      --calcite-shell-panel-width: 420px;
+      --calcite-shell-panel-max-width: 80%;
+    }
 
-      calcite-chip[selected] {
-        --calcite-ui-border-1: var(--calcite-ui-brand);
-      }
+    calcite-chip[selected] {
+      --calcite-ui-border-1: var(--calcite-ui-brand);
+    }
 
-      .canvas {
-        margin: 0 auto 1rem
-      }
+    .canvas {
+      margin: 0 auto 1rem
+    }
 
-      calcite-chip-group {
-        margin: 1rem auto .5rem;
-      }
-      #controls {
-          padding: 10px;
-          width: 30rem;
-          overflow: scroll;
-          max-height: 20rem;
-          overflow-x: hidden
-      }
-      .container {
-        height: 50vh;
-        width: 100%;
-      }
-      .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
-          max-width: 1550px;
-      }
+    calcite-chip-group {
+      margin: 1rem auto .5rem;
+    }
 
-        </style>
- 
-      </head>
-    
-      <body>
-        <header class="text-bg-dark p-0">
-          <div class="container-fluid">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-              <a href="#" class="text-decoration-none d-flex">
-                  <span class="blockquote m-0 d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none text-center">
-                    <img width="100px" src="./Logo_-Asiacell.png">
-                <h6 class="m-0">Geo Enable Customer Service App.</h6>
-                  </span>
-                  <span style="box-sizing: border-box;padding-top: 15px;" class="blockquote-footer m-0 d-flex align-items-center mb-2 mb-lg-0 text-center">
-                    <img width="10px" src="https://strategizeit.maps.arcgis.com/sharing/rest/content/items/903226b963e240209ed6922d8967f2a9/data" alt="strategizeit">
-                    <cite  title="Source Title m-0 ">Strategizeit <span style="color: red;">IT</span></cite>
-                  </span>
-              </a>
-              <!-- <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none text-center">
+    #controls {
+      padding: 10px;
+      width: 30rem;
+      overflow: scroll;
+      max-height: 20rem;
+      overflow-x: hidden
+    }
+
+    .container {
+      height: 50vh;
+      width: 100%;
+    }
+
+    .container,
+    .container-lg,
+    .container-md,
+    .container-sm,
+    .container-xl,
+    .container-xxl {
+      max-width: 1550px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <header class="text-bg-dark p-0">
+    <div class="container-fluid">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a href="#" class="text-decoration-none d-flex">
+          <span
+            class="blockquote m-0 d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none text-center">
+            <img width="100px" src="./Logo_-Asiacell.png">
+            <h6 class="m-0">Geo Enable Customer Service App.</h6>
+          </span>
+          <span style="box-sizing: border-box;padding-top: 15px;"
+            class="blockquote-footer m-0 d-flex align-items-center mb-2 mb-lg-0 text-center">
+            <img width="10px"
+              src="https://strategizeit.maps.arcgis.com/sharing/rest/content/items/903226b963e240209ed6922d8967f2a9/data"
+              alt="strategizeit">
+            <cite title="Source Title m-0 ">Strategizeit <span style="color: red;">IT</span></cite>
+          </span>
+        </a>
+        <!-- <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none text-center">
                 <img width="17%" src="https://strategizeit.maps.arcgis.com/sharing/rest/content/items/903226b963e240209ed6922d8967f2a9/data" alt="strategizeit">
                 <h6 class="m-0">Strategizeit <span style="color: red;">IT</span></h6>
               </a> -->
-              <ul class="nav nav-pills col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0" id="pills-tab" role="tablist">
-              </ul>
-      
-              <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-              </form>
-      
-              <div class="text-end">
-                <ul class="nav nav-pills col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0" id="pills-tab" role="tablist">
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link link-light active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Home</button>
-                  </li>
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link link-light " id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#shell-panel" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Site informantion</button>
-                  </li>
-                  <!-- <li class="nav-item" role="presentation">
+        <ul class="nav nav-pills col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0" id="pills-tab"
+          role="tablist">
+        </ul>
+
+        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+        </form>
+
+        <div class="text-end">
+          <ul class="nav nav-pills col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0" id="pills-tab"
+            role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link link-light active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#"
+                type="button" role="tab" aria-controls="pills-home" aria-selected="true">Home</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link link-light " id="pills-home-tab" data-bs-toggle="pill"
+                data-bs-target="#shell-panel" type="button" role="tab" aria-controls="pills-home"
+                aria-selected="true">Site informantion</button>
+            </li>
+            <!-- <li class="nav-item" role="presentation">
                     <button class="nav-link link-light" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#shell-panel2" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Search by address</button>
                   </li> -->
-                </ul>
-              </div>
-            </div>
-          </div>
-        </header>
-        <div id="applicationDiv">
-        <calcite-shell class="tab-content" id="pills-tabContent" style="position: relative;height: 100vh;">
-            <calcite-shell-panel class="tab-pane fade show " role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0" id="shell-panel" slot="panel-end" position="end"  width-scale="1">
-              <calcite-block style="min-width: 30rem;"
-              heading="SITE INFORMANTION"
-              description=""
-            ></calcite-block>
-              <calcite-panel id="panel1" >
-                <div class="p-3 accordion" id="Data_Container_By_Select_all" >
-
-                </div> 
-                <div class="p-3 accordion" id="Data_Container_By_Select" >
-
-                </div> 
-              </calcite-panel>
-            </calcite-shell-panel>
-            <calcite-shell-panel class="tab-pane fade show " role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0"  id="shell-panel2" slot="panel-end" position="end"  width-scale="1">
-              <calcite-block style="min-width: 30rem;"
-              heading="SITE INFORMANTION"
-              description=""
-            ></calcite-block>
-            <calcite-panel >
-
-              <div class="d-flex my-2 p-2" role="search">
-                <input id="SearchInput" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button id="SearchBTN" class="btn btn-outline-success" type="submit">Search</button>
-              </div>
-              <div class="p-3 accordion" id="Data_Container_By_Search" >
-
-              </div> 
-            </calcite-panel>
-
-            </calcite-shell-panel>
-            
-            <div id="viewDiv"></div>
-           
-            <div  id="overlayDiv" class="esri-widget">
-              <h4 class="esri-heading" id="head"></h4>
-              <label id="info"></label>
-              <input type="button" value="OK" class="esri-button" />
-            </div>  
-          </calcite-shell>
+          </ul>
         </div>
-            <!-- Clear Selection button -->
-            <div
-            id="clear-selection"
-            class="esri-widget esri-widget--button esri-widget esri-interactive"
-            title="Clear selection"
-          >
-            <span class="esri-icon-maps"></span>
-          </div>
+      </div>
+    </div>
+  </header>
+  <div id="applicationDiv">
+    <calcite-shell class="tab-content" id="pills-tabContent" style="position: relative;height: 100vh;">
+      <calcite-shell-panel class="tab-pane fade show " role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0"
+        id="shell-panel" slot="panel-end" position="end" width-scale="1">
+        <calcite-block style="min-width: 30rem;" heading="SITE INFORMANTION" description=""></calcite-block>
+        <calcite-panel id="panel1">
+          <div class="p-3 accordion" id="Data_Container_By_Select_all">
 
-          <div id="topbar">
-            <button class="action-button esri-icon-measure-area" id="areaButton" type="button" title="Measure area"></button>
-            <button class="action-button esri-icon-measure-line" id="distanceButton" type="button" title="Measure distance between two or more points"></button>
-            <button id="clearButton" class="action-button esri-icon-trash" type="button" title="Clear Measurements">
-            </button>
           </div>
+          <div class="p-3 accordion" id="Data_Container_By_Select">
 
-          <div id="classification">
-            <button class="action-buttonClassification " id="coverageStatusButton" type="button" title="coverage Status">coverage Status</button>
-            <button class="action-buttonClassification " id="maintentanceButton" type="button" title="maintentance">maintentance</button>
-            <button class="action-buttonClassification " id="outageButton" type="button" title="outage">outage</button>
-            <button class="action-buttonClassification " id="NumberOfTicketsButton" type="button" title="Number Of Tickets">Number Of Tickets</button>
-            <button class="action-buttonClassification " id="NumberOutagesRenderer" type="button" title="Number Of Outages">Number Of Outages</button>
           </div>
+        </calcite-panel>
+      </calcite-shell-panel>
+      <calcite-shell-panel class="tab-pane fade show " role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0"
+        id="shell-panel2" slot="panel-end" position="end" width-scale="1">
+        <calcite-block style="min-width: 30rem;" heading="SITE INFORMANTION" description=""></calcite-block>
+        <calcite-panel>
 
-          <div id="controls" class="esri-widget">
-            <p class="my-2">Filter by SD Status :</p>
-            <select id="type-select" class="form-select">
-              <option value="all">all</option>
-              <option value="Open">Open</option>
-              <option value="Dispatched">Dispatched</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Resolved-Pending TCE">Resolved-Pending TCE</option>
-              <option value="Sleep">Sleep</option>
-              <option value="Closed">Closed</option>
-            </select>
-            <p class="my-2"> Filter by Affected Service in CC :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputAffectedService" type="text" class="form-control" placeholder="Affected Service" aria-label="Affected Service"
-                aria-describedby="button-addon1">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon1">Search</button>
-            </div>
-            <p class="my-2"> Filter by Subcategory in CC :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputCCSubcategory" type="text" class="form-control" placeholder="Subcategory" aria-label="Subcategory"
-                aria-describedby="button-addon2">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
-            </div>
-            <p class="my-2"> Filter by Area in CC :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputCCArea" type="text" class="form-control" placeholder="Area" aria-label="Area"
-                aria-describedby="button-addon3">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon3">Search</button>
-            </div>
-            <p class="my-2"> Filter by Product Type in RFIs :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputProductType" type="text" class="form-control" placeholder="Product Type" aria-label="Product Type"
-                aria-describedby="button-addon4">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon4">Search</button>
-            </div>
-            <p class="my-2"> Filter by Subcategory in RFIs :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputRFIsSubcategory" type="text" class="form-control" placeholder="Subcategory" aria-label="Subcategory"
-                aria-describedby="button-addon5">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon5">Search</button>
-            </div>
-            <p class="my-2"> Filter by Area in RFIs :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputRFIsArea" type="text" class="form-control" placeholder="Area" aria-label="Area"
-                aria-describedby="button-addon6">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon6">Search</button>
-            </div>
-            <p class="my-2"> Filter by Affected Service in outages :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputOutagesAffectedService" type="text" class="form-control" placeholder="Affected Service" aria-label="Affected Service"
-                aria-describedby="button-addon7">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon7">Search</button>
-            </div>
-            <p class="my-2"> Filter by original Event Time in outages :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputOutagesOriginalEventTimeStartDate" type="datetime-local" class="form-control" >
-              <input id="SearchInputOutagesOriginalEventTimeEndDate" type="datetime-local" class="form-control" aria-describedby="button-addon8">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon8">Search</button>
-            </div>
-            <p class="my-2"> Filter by Cell ID in outages :</p>
-            <div class="input-group mb-3">
-              <input id="SearchInputOutagesCellID" type="text" class="form-control" placeholder="Cell ID" aria-label="Cell ID"
-                aria-describedby="button-addon9">
-              <button class="btn btn-outline-secondary" type="button" id="button-addon9">Search</button>
-            </div>
+          <div class="d-flex my-2 p-2" role="search">
+            <input id="SearchInput" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button id="SearchBTN" class="btn btn-outline-success" type="submit">Search</button>
           </div>
-          <div class="d-flex mt-3 px-5 justify-content-evenly">
-              <div class="col-4 p-1 text-center mx-2 ">
-                      <div class="card shadow-lg rounded-4" style="background-color: #e0e0e0;">
-                        <div class="card-body pb-0">
-                          
-                          <div class="d-flex justify-content-evenly align-items-center ">
-                            <svg style="width: 40px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM105.8 229.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L216 328.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V314.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H158.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM160 416a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>
-                            <p id="totalRFI" class="mb-0 h2 fw-bolder"></p>
-                          </div>
-                        </div>
-                        <hr>
-                        <div class="card-body pt-0">
-                          <h2 class="font-weight-bold mb-1">Total RFI</h2>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-4 p-1 text-center mx-2 ">
-                      <div class="card shadow-lg rounded-4" style="background-color: #ffcc80; ">
-                        <div class="card-body pb-0">
-                         
-                          <div class="d-flex justify-content-evenly align-items-center">
-                            <svg style="width: 55px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M64 64C28.7 64 0 92.7 0 128v64c0 8.8 7.4 15.7 15.7 18.6C34.5 217.1 48 235 48 256s-13.5 38.9-32.3 45.4C7.4 304.3 0 311.2 0 320v64c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V320c0-8.8-7.4-15.7-15.7-18.6C541.5 294.9 528 277 528 256s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6V128c0-35.3-28.7-64-64-64H64zm64 112l0 160c0 8.8 7.2 16 16 16H432c8.8 0 16-7.2 16-16V176c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16zM96 160c0-17.7 14.3-32 32-32H448c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V160z"/></svg>
-                            <p id="totalCCTickets" class="mb-0 h2 fw-bolder"></p>
-                          </div>
-                        </div>
-                        <hr>
-                        <div class="card-body pt-0">
-                          <h2 class="font-weight-bold mb-1">Total CC Tickets</h2>
-                        
-                        </div>
-                      </div>
-                    </div>
-            
-          </div>
-          <div class="d-flex mt-3 ">
+          <div class="p-3 accordion" id="Data_Container_By_Search">
 
-              <calcite-shell content-behind class="custom-example-theme ">
-                <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                  <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                    <!-- <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </div>
+        </calcite-panel>
+
+      </calcite-shell-panel>
+
+      <div id="viewDiv"></div>
+
+      <div id="overlayDiv" class="esri-widget">
+        <h4 class="esri-heading" id="head"></h4>
+        <label id="info"></label>
+        <input type="button" value="OK" class="esri-button" />
+      </div>
+    </calcite-shell>
+  </div>
+  <!-- Clear Selection button -->
+  <div id="clear-selection" class="esri-widget esri-widget--button esri-widget esri-interactive"
+    title="Clear selection">
+    <span class="esri-icon-maps"></span>
+  </div>
+
+  <div id="topbar">
+    <button class="action-button esri-icon-measure-area" id="areaButton" type="button" title="Measure area"></button>
+    <button class="action-button esri-icon-measure-line" id="distanceButton" type="button"
+      title="Measure distance between two or more points"></button>
+    <button id="clearButton" class="action-button esri-icon-trash" type="button" title="Clear Measurements">
+    </button>
+  </div>
+
+  <div id="classification">
+    <button class="action-buttonClassification " id="coverageStatusButton" type="button"
+      title="coverage Status">coverage Status</button>
+    <button class="action-buttonClassification " id="maintentanceButton" type="button"
+      title="maintentance">maintentance</button>
+    <button class="action-buttonClassification " id="outageButton" type="button" title="outage">outage</button>
+    <button class="action-buttonClassification " id="NumberOfTicketsButton" type="button"
+      title="Number Of Tickets">Number Of Tickets</button>
+    <button class="action-buttonClassification " id="NumberOutagesRenderer" type="button"
+      title="Number Of Outages">Number Of Outages</button>
+  </div>
+
+  <div id="controls" class="esri-widget">
+    <p class="my-2">Filter by SD Status :</p>
+    <select id="type-select" class="form-select">
+      <option value="all">all</option>
+      <option value="Open">Open</option>
+      <option value="Dispatched">Dispatched</option>
+      <option value="Resolved">Resolved</option>
+      <option value="Resolved-Pending TCE">Resolved-Pending TCE</option>
+      <option value="Sleep">Sleep</option>
+      <option value="Closed">Closed</option>
+    </select>
+    <p class="my-2"> Filter by Affected Service in CC :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputAffectedService" type="text" class="form-control" placeholder="Affected Service"
+        aria-label="Affected Service" aria-describedby="button-addon1">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon1">Search</button>
+    </div>
+    <p class="my-2"> Filter by Subcategory in CC :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputCCSubcategory" type="text" class="form-control" placeholder="Subcategory"
+        aria-label="Subcategory" aria-describedby="button-addon2">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+    </div>
+    <p class="my-2"> Filter by Area in CC :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputCCArea" type="text" class="form-control" placeholder="Area" aria-label="Area"
+        aria-describedby="button-addon3">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon3">Search</button>
+    </div>
+    <p class="my-2"> Filter by Product Type in RFIs :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputProductType" type="text" class="form-control" placeholder="Product Type"
+        aria-label="Product Type" aria-describedby="button-addon4">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon4">Search</button>
+    </div>
+    <p class="my-2"> Filter by Subcategory in RFIs :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputRFIsSubcategory" type="text" class="form-control" placeholder="Subcategory"
+        aria-label="Subcategory" aria-describedby="button-addon5">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon5">Search</button>
+    </div>
+    <p class="my-2"> Filter by Area in RFIs :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputRFIsArea" type="text" class="form-control" placeholder="Area" aria-label="Area"
+        aria-describedby="button-addon6">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon6">Search</button>
+    </div>
+    <p class="my-2"> Filter by Affected Service in outages :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputOutagesAffectedService" type="text" class="form-control" placeholder="Affected Service"
+        aria-label="Affected Service" aria-describedby="button-addon7">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon7">Search</button>
+    </div>
+    <p class="my-2"> Filter by original Event Time in outages :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputOutagesOriginalEventTimeStartDate" type="datetime-local" class="form-control">
+      <input id="SearchInputOutagesOriginalEventTimeEndDate" type="datetime-local" class="form-control"
+        aria-describedby="button-addon8">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon8">Search</button>
+    </div>
+    <p class="my-2"> Filter by Cell ID in outages :</p>
+    <div class="input-group mb-3">
+      <input id="SearchInputOutagesCellID" type="text" class="form-control" placeholder="Cell ID" aria-label="Cell ID"
+        aria-describedby="button-addon9">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon9">Search</button>
+    </div>
+  </div>
+  <div class="d-flex mt-3 px-5 justify-content-evenly">
+    <div class="col-4 p-1 text-center mx-2 ">
+      <div class="card shadow-lg rounded-4" style="background-color: #e0e0e0;">
+        <div class="card-body pb-0">
+
+          <div class="d-flex justify-content-evenly align-items-center ">
+            <svg style="width: 40px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+              <path
+                d="M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM105.8 229.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L216 328.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V314.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H158.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM160 416a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z" />
+            </svg>
+            <p id="totalRFI" class="mb-0 h2 fw-bolder"></p>
+          </div>
+        </div>
+        <hr>
+        <div class="card-body pt-0">
+          <h2 class="font-weight-bold mb-1">Total RFI</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-4 p-1 text-center mx-2 ">
+      <div class="card shadow-lg rounded-4" style="background-color: #ffcc80; ">
+        <div class="card-body pb-0">
+
+          <div class="d-flex justify-content-evenly align-items-center">
+            <svg style="width: 55px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+              <path
+                d="M64 64C28.7 64 0 92.7 0 128v64c0 8.8 7.4 15.7 15.7 18.6C34.5 217.1 48 235 48 256s-13.5 38.9-32.3 45.4C7.4 304.3 0 311.2 0 320v64c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V320c0-8.8-7.4-15.7-15.7-18.6C541.5 294.9 528 277 528 256s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6V128c0-35.3-28.7-64-64-64H64zm64 112l0 160c0 8.8 7.2 16 16 16H432c8.8 0 16-7.2 16-16V176c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16zM96 160c0-17.7 14.3-32 32-32H448c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V160z" />
+            </svg>
+            <p id="totalCCTickets" class="mb-0 h2 fw-bolder"></p>
+          </div>
+        </div>
+        <hr>
+        <div class="card-body pt-0">
+          <h2 class="font-weight-bold mb-1">Total CC Tickets</h2>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="d-flex mt-3 ">
+
+    <calcite-shell content-behind class="custom-example-theme ">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <!-- <calcite-chip-group id="type-chips" selection-mode="single-persist">
                       <calcite-chip appearance="outline-fill" selected value="day">Daily</calcite-chip>
                       <calcite-chip appearance="outline-fill" value="week">Weekly</calcite-chip>
                       <calcite-chip appearance="outline-fill" value="month">Monthly</calcite-chip>
                     </calcite-chip-group> -->
-                    <calcite-block open id="chart-day" heading="Total SD OPEN_TIME by time of day">
-                    </calcite-block>
-                    <calcite-block open id="chart-week" heading="Total SD OPEN_TIME by time of week" style="display:none">
-                    </calcite-block>
-                    <calcite-block open id="chart-month" heading="Total SD OPEN_TIME by time of month" style="display:none">
-                    </calcite-block>
-                    <!-- <canvas class="canvas" id="chart-week" height="270" width="400" style="display:none"></canvas> -->
-                      <!-- <canvas class="canvas" id="chart-month" height="270" width="400" style="display:none"></canvas> -->
-                    <!-- <calcite-block open id="chart-block" heading="Total SD OPEN_TIME by time of day">
+          <calcite-block open id="chart-day" heading="Total SD OPEN_TIME by time of day">
+          </calcite-block>
+          <calcite-block open id="chart-week" heading="Total SD OPEN_TIME by time of week" style="display:none">
+          </calcite-block>
+          <calcite-block open id="chart-month" heading="Total SD OPEN_TIME by time of month" style="display:none">
+          </calcite-block>
+          <!-- <canvas class="canvas" id="chart-week" height="270" width="400" style="display:none"></canvas> -->
+          <!-- <canvas class="canvas" id="chart-month" height="270" width="400" style="display:none"></canvas> -->
+          <!-- <calcite-block open id="chart-block" heading="Total SD OPEN_TIME by time of day">
                       <canvas class="canvas" id="chart-day" height="270" width="400"></canvas>
                       <canvas class="canvas" id="chart-week" height="270" width="400" style="display:none"></canvas>
                       <canvas class="canvas" id="chart-month" height="270" width="400" style="display:none"></canvas>
                     </calcite-block> -->
-                    <calcite-block open id="chart-day-distribution" heading="Click on the graph bar to see hourly chart" style="display:none">
-                      <!-- <canvas class="canvas" id="chart-day-distribution" height="200" width="400"></canvas> -->
-                    </calcite-block>
-                    <!-- <calcite-block open id="day-chart-block" heading="Click on the graph bar to see hourly chart" style="display:none">
+          <calcite-block open id="chart-day-distribution" heading="Click on the graph bar to see hourly chart"
+            style="display:none">
+            <!-- <canvas class="canvas" id="chart-day-distribution" height="200" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-block open id="day-chart-block" heading="Click on the graph bar to see hourly chart" style="display:none">
                       <canvas class="canvas" id="chart-day-distribution" height="200" width="400"></canvas>
                     </calcite-block> -->
-                    <!-- <calcite-notice slot="footer" open width="full" icon>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                       <span slot="title">Note</span>
                       <span slot="message">Click on the graph bars to highlight the data in the map</span>
                     </calcite-notice> -->
-                  </calcite-panel>
-                </calcite-shell-panel>
-            </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-SDStatus" heading="Total HPMS Tickets by SD Status">
-                    <!-- <canvas class="canvas" id="chart-SDStatus" height="300" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-SDStatus" heading="Total HPMS Tickets by SD Status">
+            <!-- <canvas class="canvas" id="chart-SDStatus" height="300" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" display-mode="float" style="height: 65vh!important;" >
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-subcategory" heading="Total Tickets by Sub Category">
-                    <!-- <canvas class="canvas" id="chart-subcategory" height="290" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" display-mode="float" style="height: 65vh!important;">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-subcategory" heading="Total Tickets by Sub Category">
+            <!-- <canvas class="canvas" id="chart-subcategory" height="290" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-          </div>
-          <div class="d-flex mt-3">
+  </div>
+  <div class="d-flex mt-3">
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-RFIAffected" heading="Total RFI Affected Service based on Selected Cell on Map for latest 24 hrs">
-                    <!-- <canvas class="canvas" id="chart-RFIAffected" height="300" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-RFIAffected"
+            heading="Total RFI Affected Service based on Selected Cell on Map for latest 24 hrs">
+            <!-- <canvas class="canvas" id="chart-RFIAffected" height="300" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-RFISubcategory" heading="Total RFI Subcategory based on Selected Cell on Map for latest 24 hrs">
-                    <!-- <canvas class="canvas" id = "chart-RFISubcategory" height="300" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-RFISubcategory"
+            heading="Total RFI Subcategory based on Selected Cell on Map for latest 24 hrs">
+            <!-- <canvas class="canvas" id = "chart-RFISubcategory" height="300" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-RFIPRODUCTTYPE" heading="Total RFI Product Type based on Selected Cell on Map for latest 24 hrs">
-                    <!-- <canvas class="canvas" id = "chart-RFIPRODUCTTYPE" height="300" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-RFIPRODUCTTYPE"
+            heading="Total RFI Product Type based on Selected Cell on Map for latest 24 hrs">
+            <!-- <canvas class="canvas" id = "chart-RFIPRODUCTTYPE" height="300" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-          </div>
-          <div class="d-flex mt-3">
+  </div>
+  <div class="d-flex mt-3">
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-CCTicketsAffected" heading="Total CCTickets Affected Service based on Selected Cell on Map for latest 24 hrs">
-                    <!-- <canvas class="canvas" id="chart-CCTicketsAffected" height="300" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-CCTicketsAffected"
+            heading="Total CCTickets Affected Service based on Selected Cell on Map for latest 24 hrs">
+            <!-- <canvas class="canvas" id="chart-CCTicketsAffected" height="300" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-CCTicketsSubcategory" heading="Total CCTickets Subcategory based on Selected Cell on Map for latest 24 hrs">
-                    <!-- <canvas class="canvas" id="chart-CCTicketsSubcategory" height="300" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-CCTicketsSubcategory"
+            heading="Total CCTickets Subcategory based on Selected Cell on Map for latest 24 hrs">
+            <!-- <canvas class="canvas" id="chart-CCTicketsSubcategory" height="300" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-            <calcite-shell content-behind class="custom-example-theme">
-              <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
-                <calcite-panel id="statsPanel" heading="Note:" description="Click on the graph bars to highlight the data in the map.">
-                  <calcite-chip-group id="type-chips" selection-mode="single-persist">
-                  </calcite-chip-group>
-                  <calcite-block open id="chart-CCTicketsArea" heading="Total CCTickets Subcategory based on Selected Cell on Map for latest 24 hrs">
-                    <!-- <canvas class="canvas" id="chart-CCTicketsArea" height="300" width="400"></canvas> -->
-                  </calcite-block>
-                  <!-- <calcite-notice slot="footer" open width="full" icon>
+    <calcite-shell content-behind class="custom-example-theme">
+      <calcite-shell-panel id="rightPanel" slot="panel-end" style="height: 65vh!important;" display-mode="float">
+        <calcite-panel id="statsPanel" heading="Note:"
+          description="Click on the graph bars to highlight the data in the map.">
+          <calcite-chip-group id="type-chips" selection-mode="single-persist">
+          </calcite-chip-group>
+          <calcite-block open id="chart-CCTicketsArea"
+            heading="Total CCTickets Subcategory based on Selected Cell on Map for latest 24 hrs">
+            <!-- <canvas class="canvas" id="chart-CCTicketsArea" height="300" width="400"></canvas> -->
+          </calcite-block>
+          <!-- <calcite-notice slot="footer" open width="full" icon>
                     <span slot="title">Note</span>
                     <span slot="message">Click on the graph bars to highlight the data in the map</span>
                   </calcite-notice> -->
-                </calcite-panel>
-              </calcite-shell-panel>
-          </calcite-shell>
+        </calcite-panel>
+      </calcite-shell-panel>
+    </calcite-shell>
 
-          </div>
+  </div>
 
-          <nav>
-            <div class="nav nav-tabs mt-3	mb-1" id="nav-tab" role="tablist">
-              <button class="nav-link active" id="nav-Sites-tab" data-bs-toggle="tab" data-bs-target="#nav-Sites" type="button" role="tab" aria-controls="nav-Sites" aria-selected="true">Sites</button>
-              <button class="nav-link" id="nav-Cells-tab" data-bs-toggle="tab" data-bs-target="#nav-Cells" type="button" role="tab" aria-controls="nav-Cells" aria-selected="false">Cells</button>
-              <button class="nav-link" id="nav-NetworkCoverage-tab" data-bs-toggle="tab" data-bs-target="#nav-NetworkCoverage" type="button" role="tab" aria-controls="nav-NetworkCoverage" aria-selected="false">Network Coverage</button>
-              <button class="nav-link" id="nav-HPMS-Tickets-tab" data-bs-toggle="tab" data-bs-target="#nav-HPMS-Tickets" type="button" role="tab" aria-controls="nav-HPMS-Tickets" aria-selected="false">HPSM Tickets</button>
-              <button class="nav-link" id="nav-RFIsFC-tab" data-bs-toggle="tab" data-bs-target="#nav-RFIsFC" type="button" role="tab" aria-controls="nav-RFIsFC" aria-selected="false">RFIs </button>
-              <button class="nav-link" id="nav-CCTicketsFC-tab" data-bs-toggle="tab" data-bs-target="#nav-CCTicketsFC" type="button" role="tab" aria-controls="nav-CCTicketsFC" aria-selected="false">CC Tickets</button>
-              <button class="nav-link" id="nav-JammerSites-tab" data-bs-toggle="tab" data-bs-target="#nav-JammerSites" type="button" role="tab" aria-controls="nav-JammerSites" aria-selected="false" >Jammer Sites</button>
-              <button class="nav-link" id="nav-Maintenance-Site-Operation-tab" data-bs-toggle="tab" data-bs-target="#nav-Maintenance-Site-Operation" type="button" role="tab" aria-controls="nav-Maintenance-Site-Operation" aria-selected="false">Maintenance Site Operation</button>
-              <button class="nav-link" id="nav-OutagesData-tab" data-bs-toggle="tab" data-bs-target="#nav-OutagesData" type="button" role="tab" aria-controls="nav-OutagesData" aria-selected="false" >OutagesData</button>
-              <button class="nav-link" id="nav-Interference-tab" data-bs-toggle="tab" data-bs-target="#nav-Interference" type="button" role="tab" aria-controls="nav-Interference" aria-selected="false" >Interference</button>
-              <button class="nav-link" id="nav-NMSIncident-tab" data-bs-toggle="tab" data-bs-target="#nav-NMSIncident" type="button" role="tab" aria-controls="nav-NMSIncident" aria-selected="false" >NMS Incident</button>
-            </div>
-          </nav>
-          <div class="tab-content d-flex" id="nav-tabContent">
-              <div class="container tab-pane fade show active mb-3" id="nav-Sites" role="tabpanel" aria-labelledby="nav-Sites-tab" tabindex="0">
-                 <div id="tableDiv-Sites" >
-              </div>
-           </div>
-              <div class="container tab-pane fade mb-3" id="nav-NetworkCoverage" role="tabpanel" aria-labelledby="nav-NetworkCoverage-tab" tabindex="0">
-                 <div id="tableDiv-NetworkCoverage" >
-              </div>
-           </div>
-            <div class="container tab-pane fade mb-3" id="nav-HPMS-Tickets" role="tabpanel" aria-labelledby="nav-HPMS-Tickets-tab" tabindex="0">
-              <div id="tableDiv-HPSMTickets">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-RFIsFC" role="tabpanel" aria-labelledby="nav-RFIsFC-tab" tabindex="0">
-              <div id="tableDiv-RFIsFC">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-CCTicketsFC" role="tabpanel" aria-labelledby="nav-CCTicketsFC-tab" tabindex="0">
-              <div id="tableDiv-CCTicketsFC">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-JammerSites" role="tabpanel" aria-labelledby="nav-JammerSites-tab" tabindex="0">
-              <div id="tableDiv-JammerSites">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-Maintenance-Site-Operation" role="tabpanel" aria-labelledby="nav-Maintenance-Site-Operation-tab" tabindex="0">
-              <div id="tableDiv-MaintenanceSiteOperation">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-OutagesData" role="tabpanel" aria-labelledby="nav-OutagesData-tab" tabindex="0">
-              <div id="tableDiv-OutagesData">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-Interference" role="tabpanel" aria-labelledby="nav-Interference-tab" tabindex="0">
-              <div id="tableDiv-Interference">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-Cells" role="tabpanel" aria-labelledby="nav-Cells-tab" tabindex="0">
-              <div id="tableDiv-Cells">
-              </div>
-            </div>
-            <div class="container tab-pane fade mb-3" id="nav-NMSIncident" role="tabpanel" aria-labelledby="nav-NMSIncident-tab" tabindex="0">
-              <div id="tableDiv-NMSIncident">
-              </div>
-            </div>
-          </div>
+  <nav>
+    <div class="nav nav-tabs mt-3	mb-1" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-Sites-tab" data-bs-toggle="tab" data-bs-target="#nav-Sites" type="button"
+        role="tab" aria-controls="nav-Sites" aria-selected="true">Sites</button>
+      <button class="nav-link" id="nav-Cells-tab" data-bs-toggle="tab" data-bs-target="#nav-Cells" type="button"
+        role="tab" aria-controls="nav-Cells" aria-selected="false">Cells</button>
+      <!-- <button class="nav-link" id="nav-NetworkCoverage-tab" data-bs-toggle="tab" data-bs-target="#nav-NetworkCoverage" type="button" role="tab" aria-controls="nav-NetworkCoverage" aria-selected="false">Network Coverage</button> -->
+      <button class="nav-link" id="nav-HPMS-Tickets-tab" data-bs-toggle="tab" data-bs-target="#nav-HPMS-Tickets"
+        type="button" role="tab" aria-controls="nav-HPMS-Tickets" aria-selected="false">HPSM Tickets</button>
+      <button class="nav-link" id="nav-RFIsFC-tab" data-bs-toggle="tab" data-bs-target="#nav-RFIsFC" type="button"
+        role="tab" aria-controls="nav-RFIsFC" aria-selected="false">RFIs </button>
+      <button class="nav-link" id="nav-CCTicketsFC-tab" data-bs-toggle="tab" data-bs-target="#nav-CCTicketsFC"
+        type="button" role="tab" aria-controls="nav-CCTicketsFC" aria-selected="false">CC Tickets</button>
+      <button class="nav-link" id="nav-JammerSites-tab" data-bs-toggle="tab" data-bs-target="#nav-JammerSites"
+        type="button" role="tab" aria-controls="nav-JammerSites" aria-selected="false">Jammer Sites</button>
+      <button class="nav-link" id="nav-Maintenance-Site-Operation-tab" data-bs-toggle="tab"
+        data-bs-target="#nav-Maintenance-Site-Operation" type="button" role="tab"
+        aria-controls="nav-Maintenance-Site-Operation" aria-selected="false">Maintenance Site Operation</button>
+      <button class="nav-link" id="nav-OutagesData-tab" data-bs-toggle="tab" data-bs-target="#nav-OutagesData"
+        type="button" role="tab" aria-controls="nav-OutagesData" aria-selected="false">OutagesData</button>
+      <button class="nav-link" id="nav-Interference-tab" data-bs-toggle="tab" data-bs-target="#nav-Interference"
+        type="button" role="tab" aria-controls="nav-Interference" aria-selected="false">Interference</button>
+      <button class="nav-link" id="nav-NMSIncident-tab" data-bs-toggle="tab" data-bs-target="#nav-NMSIncident"
+        type="button" role="tab" aria-controls="nav-NMSIncident" aria-selected="false">NMS Incident</button>
+    </div>
+  </nav>
+  <div class="tab-content d-flex" id="nav-tabContent">
+    <div class="container tab-pane fade show active mb-3" id="nav-Sites" role="tabpanel" aria-labelledby="nav-Sites-tab"
+      tabindex="0">
+      <div id="tableDiv-Sites">
+      </div>
+    </div>
+    <!-- <div class="container tab-pane fade mb-3" id="nav-NetworkCoverage" role="tabpanel"
+      aria-labelledby="nav-NetworkCoverage-tab" tabindex="0">
+      <div id="tableDiv-NetworkCoverage">
+      </div>
+    </div> -->
+    <div class="container tab-pane fade mb-3" id="nav-HPMS-Tickets" role="tabpanel"
+      aria-labelledby="nav-HPMS-Tickets-tab" tabindex="0">
+      <div id="tableDiv-HPSMTickets">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-RFIsFC" role="tabpanel" aria-labelledby="nav-RFIsFC-tab"
+      tabindex="0">
+      <div id="tableDiv-RFIsFC">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-CCTicketsFC" role="tabpanel" aria-labelledby="nav-CCTicketsFC-tab"
+      tabindex="0">
+      <div id="tableDiv-CCTicketsFC">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-JammerSites" role="tabpanel" aria-labelledby="nav-JammerSites-tab"
+      tabindex="0">
+      <div id="tableDiv-JammerSites">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-Maintenance-Site-Operation" role="tabpanel"
+      aria-labelledby="nav-Maintenance-Site-Operation-tab" tabindex="0">
+      <div id="tableDiv-MaintenanceSiteOperation">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-OutagesData" role="tabpanel" aria-labelledby="nav-OutagesData-tab"
+      tabindex="0">
+      <div id="tableDiv-OutagesData">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-Interference" role="tabpanel"
+      aria-labelledby="nav-Interference-tab" tabindex="0">
+      <div id="tableDiv-Interference">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-Cells" role="tabpanel" aria-labelledby="nav-Cells-tab"
+      tabindex="0">
+      <div id="tableDiv-Cells">
+      </div>
+    </div>
+    <div class="container tab-pane fade mb-3" id="nav-NMSIncident" role="tabpanel" aria-labelledby="nav-NMSIncident-tab"
+      tabindex="0">
+      <div id="tableDiv-NMSIncident">
+      </div>
+    </div>
+  </div>
 
-        <!-- <img src="./Untitled.png" alt=""> -->
-        <script src="./bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-        <!-- <script src="https://unpkg.com/@esri/arcgis-rest-request@4.0.0/dist/bundled/request.umd.js"></script> -->
-        <!-- <script src="https://unpkg.com/@esri/arcgis-rest-feature-service@4.0.0/dist/bundled/feature-service.umd.js"></script> -->
-        <script src="./arcgis_js_v428_api/arcgis_js_api/javascript/4.28/init.js"></script>
-        <script type="module" src="https://js.arcgis.com/calcite-components/1.9.2/calcite.esm.js"></script>
-        <script src="./jquery-3.6.0.min.js"></script>
-        <script src="./index.js"></script>
-      </body>
+  <!-- <img src="./Untitled.png" alt=""> -->
+  <script src="./bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+    crossorigin="anonymous"></script>
+  <!-- <script src="https://unpkg.com/@esri/arcgis-rest-request@4.0.0/dist/bundled/request.umd.js"></script> -->
+  <!-- <script src="https://unpkg.com/@esri/arcgis-rest-feature-service@4.0.0/dist/bundled/feature-service.umd.js"></script> -->
+  <script src="./arcgis_js_v428_api/arcgis_js_api/javascript/4.28/init.js"></script>
+  <script type="module" src="https://js.arcgis.com/calcite-components/1.9.2/calcite.esm.js"></script>
+  <script src="./jquery-3.6.0.min.js"></script>
+  <script src="./index.js"></script>
+</body>
+
 </html>
