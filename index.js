@@ -48,7 +48,7 @@ require([
   FeatureTable
 ) => {
   (async () => {
-    let webmapId = "6ec29318183e49aca041c577e78cf86d";
+    let webmapId = "f4f6642aa5514d83aae6de0ebb65057e";
     if (window.location.href.indexOf("?id=") > 0) {
       webmapId = window.location.href.split("?id=")[1];
     }
@@ -118,15 +118,15 @@ require([
 
     const Iraq = map.layers.getItemAt(0);
     const Governerate = map.layers.getItemAt(1);
-    const Cells = map.layers.getItemAt(2);
-    const sitesFinal = map.layers.getItemAt(3);
-    const Cell_Site_Data_Jammer_Sites = map.layers.getItemAt(4);
+    const Cells = map.layers.getItemAt(5);
+    const sitesFinal = map.layers.getItemAt(7);
+    const Cell_Site_Data_Jammer_Sites = map.layers.getItemAt(10);
 
     const IraqTitle = 'Iraq'
     const GovernerateTitle = 'Governerate'
     const CellsTitle = 'Cell'
-    const sitesFinalTitle = 'Site'
-    const Cell_Site_Data_Jammer_SitesTitle = 'Jammer_Sites'
+    const sitesFinalTitle = 'sitesfinal'
+    const Cell_Site_Data_Jammer_SitesTitle = 'Cell_Site_Data - Jammer_Sites'
 
     const CCTicketsFCExportFeatures = new FeatureLayer({
       url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/4'
