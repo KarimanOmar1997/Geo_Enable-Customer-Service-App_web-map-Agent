@@ -82,172 +82,634 @@ require([
     map.layers.forEach(async (layer) => {
       await layer.load();
       // Create a new Calcite block for each layer and add to an array to access later.
+      const layerBlock = document.createElement("calcite-block");
+      layerBlock.id = layer.title;
+      layerBlock.heading = layer.title;
+      layerBlock.open = true;
 
-
-      console.log(" layer.title :", layer.title);
-      if (layer.title == "CCTickets_RFI") {
-        layer.allLayers.forEach(async (layer) => {
-          const layerBlock = document.createElement("calcite-block");
-          console.log("layer.allLayers", layer);
-          layerBlock.id = layer.title;
-          layerBlock.heading = layer.title;
-          layerBlock.open = true;
-          layerBlockArray.push(layerBlock);
-        })
-
-      } else {
-        const layerBlock = document.createElement("calcite-block");
-        layerBlock.id = layer.title;
-        layerBlock.heading = layer.title;
-        layerBlock.open = true;
-        layerBlockArray.push(layerBlock);
-      }
+      layerBlockArray.push(layerBlock);
       // Create an array of layerViews to be able to highlight selected features.
       if (layer.type === "feature") {
         const layerView = await view.whenLayerView(layer);
         layerViews.push(layerView);
       }
     });
+
+    // Function to update data on the map
+    function updateMapData() {
+      map.layers.forEach(async (layer) => {
+        await layer.load();
+        // Assuming "map" is your ArcGIS Map object
+        // Assuming "featureLayer" is the layer you want to update
+        layer.refresh(); // Refresh the layer
+      })
+    }
+
+    // Periodically check for updates (e.g., every 5 minutes)
+    setInterval(updateMapData, 3000);
+
+    // =========================================================== intial layers ========================================
+
     console.log("to get 0 :", map.layers.getItemAt(0).title);
     console.log("to get 1 :", map.layers.getItemAt(1).title);
     console.log("to get 2 :", map.layers.getItemAt(2).title);
     console.log("to get 3 :", map.layers.getItemAt(3).title);
     console.log("to get 4 :", map.layers.getItemAt(4).title);
-  
+
     const Iraq = map.layers.getItemAt(0);
     const Governerate = map.layers.getItemAt(1);
     const Cells = map.layers.getItemAt(2);
     const sitesFinal = map.layers.getItemAt(3);
     const Cell_Site_Data_Jammer_Sites = map.layers.getItemAt(4);
-    // const NetworkArea = map.layers.getItemAt(2);
-    // const CoveragebyRSRP_85_CoveragebyRSRP_44_85 = map.layers.getItemAt(3);
-    // const NetworkCoverage = map.layers.getItemAt(4);
-    // const FiberIssues_WFL1 = map.layers.getItemAt(11);
+
     const IraqTitle = 'Iraq'
     const GovernerateTitle = 'Governerate'
-    // const NetworkAreaTitle = 'Network Area'
-    // const CoveragebyRSRP_85_CoveragebyRSRP_44_85Title = 'CoveragebyRSRP_85 - CoveragebyRSRP_44_85'
-    // const NetworkCoverageTitle = 'Network Coverage'
     const CellsTitle = 'Cell'
-    // const HPSMTicketsTitle = 'HPSM Tickets'
     const sitesFinalTitle = 'Site'
-    // const RFIsFCTitle = 'RFIs FC'
-    // const CCTicketsFCExportFeaturesTitle = 'CCTicketsFC ExportFeatures'
     const Cell_Site_Data_Jammer_SitesTitle = 'Jammer_Sites'
-    // const FiberIssues_WFL1Title = 'FiberIssues_WFL1'
-    
+
     const CCTicketsFCExportFeatures = new FeatureLayer({
       url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/4'
-      });
+    });
     const RFIsFC = new FeatureLayer({
       url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/5'
-      });
-    const HPSMTickets =  new FeatureLayer({
-    url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/7'
+    });
+    const HPSMTickets = new FeatureLayer({
+      url: 'https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_cell_data_v6/FeatureServer/7'
     });
     const featureLayerInterference = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Cell_Site_Data/FeatureServer/6"
     });
-    
     const featureLayerNMSIncident = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/NMS_Incident/FeatureServer/4"
     });
-    
     const featureLayerMaintenanceSiteOperation = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_Cell_V4/FeatureServer/4"
     });
-    
     const featureLayerOutagesData = new FeatureLayer({
       url: "https://services3.arcgis.com/N0l9vjYH8GLn5HZh/arcgis/rest/services/Asia_Cell_V4/FeatureServer/5"
     });
 
-    const coverageStatusRenderer = {
-      type: "unique-value",
-      legendOptions: {
-        title: "coverage_status"
+    // =========================================================== tables ========================================
+
+    // Create the feature table
+    const featureTableSites = new FeatureTable({
+      view: view, // Required for feature highlight to work
+      layer: sitesFinal,
+      visibleElements: {
+        // Autocast to VisibleElements
+        menuItems: {
+          clearSelection: true,
+          refreshData: true,
+          toggleColumns: true,
+          selectedRecordsShowAllToggle: true,
+          selectedRecordsShowSelectedToggle: true,
+          zoomToSelection: true
+        }
       },
-      field: "coverage_status",
-      uniqueValueInfos: [{
-        value: "Strong",
-        label: "Strong",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "#6ed51b",
-          outline: null
+      returnGeometryEnabled: true,
+      container: document.getElementById("tableDiv-Sites")
+    });
+
+    const featureTableCells = new FeatureTable({
+      view: view, // Required for feature highlight to work
+      layer: Cells,
+      visibleElements: {
+        // Autocast to VisibleElements
+        menuItems: {
+          clearSelection: true,
+          refreshData: true,
+          toggleColumns: true,
+          selectedRecordsShowAllToggle: true,
+          selectedRecordsShowSelectedToggle: true,
+          zoomToSelection: true
         }
-      }
-        ,
-      {
-        value: "Average",
-        label: "Average",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "#fda51b",
-          outline: null
+      },
+      returnGeometryEnabled: true,
+      container: document.getElementById("tableDiv-Cells")
+    });
+
+    const featureTableJammerSites = new FeatureTable({
+      view: view, // Required for feature highlight to work
+      layer: Cell_Site_Data_Jammer_Sites,
+      visibleElements: {
+        // Autocast to VisibleElements
+        menuItems: {
+          clearSelection: true,
+          refreshData: true,
+          toggleColumns: true,
+          selectedRecordsShowAllToggle: true,
+          selectedRecordsShowSelectedToggle: true,
+          zoomToSelection: true
         }
-      }
-        ,
-      {
-        value: "Poor",
-        label: "Poor",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "#e91d1b",
-          outline: null
+      },
+      returnGeometryEnabled: true,
+      container: document.getElementById("tableDiv-JammerSites")
+    });
+
+    const featureTableOutagesData = new FeatureTable({
+      view: view, // Required for feature highlight to work
+      layer: featureLayerOutagesData,
+      visibleElements: {
+        // Autocast to VisibleElements
+        menuItems: {
+          clearSelection: true,
+          refreshData: true,
+          toggleColumns: true,
+          selectedRecordsShowAllToggle: true,
+          selectedRecordsShowSelectedToggle: true,
+          zoomToSelection: false
         }
+      },
+
+      container: document.getElementById("tableDiv-OutagesData")
+    });
+
+    const featureTableRFIsFC = new FeatureTable({
+      view: view, // Required for feature highlight to work
+      layer: RFIsFC,
+      visibleElements: {
+        // Autocast to VisibleElements
+        menuItems: {
+          clearSelection: true,
+          refreshData: true,
+          toggleColumns: true,
+          selectedRecordsShowAllToggle: true,
+          selectedRecordsShowSelectedToggle: true,
+          zoomToSelection: true
+        }
+      },
+
+      container: document.getElementById("tableDiv-RFIsFC")
+    });
+
+    const featureTableCCTickets = new FeatureTable({
+      view: view, // Required for feature highlight to work
+      layer: CCTicketsFCExportFeatures,
+      visibleElements: {
+        // Autocast to VisibleElements
+        menuItems: {
+          clearSelection: true,
+          refreshData: true,
+          toggleColumns: true,
+          selectedRecordsShowAllToggle: true,
+          selectedRecordsShowSelectedToggle: true,
+          zoomToSelection: true
+        }
+      },
+
+
+      container: document.getElementById("tableDiv-CCTicketsFC")
+    });
+
+    const featureTableNMSIncident = new FeatureTable({
+      view: view, // Required for feature highlight to work
+      layer: featureLayerNMSIncident,
+      visibleElements: {
+        // Autocast to VisibleElements
+        menuItems: {
+          clearSelection: true,
+          refreshData: true,
+          toggleColumns: true,
+          selectedRecordsShowAllToggle: true,
+          selectedRecordsShowSelectedToggle: true,
+          zoomToSelection: false
+        }
+      },
+
+      container: document.getElementById("tableDiv-NMSIncident")
+    });
+
+    featureTableCells.on("selection-change", (event) => {
+   
+    });
+    featureTableSites.on("selection-change", (event) => {
+    });
+    featureTableJammerSites.on("selection-change", (event) => {
+    });
+    featureTableOutagesData.on("selection-change", (event) => {
+    });
+    featureTableRFIsFC.on("selection-change", (event) => {
+    });
+    featureTableCCTickets.on("selection-change", (event) => {
+    });
+    featureTableNMSIncident.on("selection-change", (event) => {
+    });
+
+    function tablesButtonsForSpatilData(table, layer, container) {
+
+      const selectionContener = document.createElement('div')
+      selectionContener.classList.add('d-flex', 'gap-3')
+      document.getElementById(container).appendChild(selectionContener);
+      const showSelectionButton = document.createElement('button');
+      showSelectionButton.textContent = 'Show Selection';
+      showSelectionButton.classList.add('esri-button', 'esri-button--secondary');
+
+      // Add event listener for "Show Selection" button
+      showSelectionButton.addEventListener('click', function () {
+        // Get the selected features
+        table.filterBySelection()
+      });
+
+      // Add "Show Selection" button to the table container
+      selectionContener.appendChild(showSelectionButton);
+
+      // Create "Show All" button
+      const showAllButton = document.createElement('button');
+      showAllButton.textContent = 'Show All';
+      showAllButton.classList.add('esri-button', 'esri-button--secondary');
+
+      // Add event listener for "Show All" button
+      showAllButton.addEventListener('click', function () {
+        // Clear any existing selection
+        table.clearSelectionFilter()
+      });
+
+      // Add "Show All" button to the table container
+      selectionContener.appendChild(showAllButton);
+
+      // Create "Zoom To Selection" button
+      const zoomToSelectionButton = document.createElement('button');
+      zoomToSelectionButton.textContent = 'Zoom To Selection';
+      zoomToSelectionButton.classList.add('esri-button', 'esri-button--secondary');
+
+      // Add event listener for Zoom To Selection" button
+      zoomToSelectionButton.addEventListener('click', function () {
+        // Clear any existing selection
+        table.zoomToSelection()
+      });
+
+      // Add "Zoom To Selection" button to the table container
+      selectionContener.appendChild(zoomToSelectionButton);
+
+      // Create "clear Selection" button
+      const clearSelectionButton = document.createElement('button');
+      clearSelectionButton.textContent = 'Clear Selection';
+      clearSelectionButton.classList.add('esri-button', 'esri-button--secondary');
+
+      // Add event listener for "clear Selection" button
+      clearSelectionButton.addEventListener('click', function () {
+        // Clear any existing selection
+        table.clearSelection()
+      });
+
+      // Add "clear Selection" button to the table container
+      selectionContener.appendChild(clearSelectionButton);
+
+      async function downloadCSV() {
+        const queryParams = {
+          where: "1=1", // Query to retrieve all features (you can adjust this according to your needs)
+          outFields: ["*"] // Specify the fields you want to include in the result
+        };
+
+        // Query features
+        const result = await layer.queryFeatures(queryParams);
+
+        // Get all features from the FeatureTable
+
+        const allFeatures = result.features;
+
+        // Extract attributes from each feature
+        const csvContent = [];
+        csvContent.push(Object.keys(allFeatures[0].attributes).join(',')); // Add headers
+
+        allFeatures.forEach(feature => {
+          const values = Object.values(feature.attributes).map(value => {
+            // Ensure values are properly formatted (e.g., handle commas within values)
+            if (typeof value === 'string') {
+              return `"${value.replace(/"/g, '""')}"`;
+            } else {
+              return value;
+            }
+          });
+          csvContent.push(values.join(','));
+        });
+
+        // Convert to CSV string
+        const csvString = csvContent.join('\n');
+
+        // Download CSV file
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'data.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
-      ]
+
+      // Create a button to trigger CSV download
+      const downloadCSVButton = document.createElement('button');
+      downloadCSVButton.textContent = 'Download CSV';
+      downloadCSVButton.classList.add('esri-button', 'esri-button--secondary');
+      downloadCSVButton.addEventListener('click', downloadCSV);
+
+      // Add the button to the table container
+      selectionContener.appendChild(downloadCSVButton);
+
+    }
+
+    function tablesButtonsForTabularData(table, layer, container) {
+
+      const selectionContener = document.createElement('div')
+      selectionContener.classList.add('d-flex', 'gap-3')
+      document.getElementById(container).appendChild(selectionContener);
+      const showSelectionButton = document.createElement('button');
+      showSelectionButton.textContent = 'Show Selection';
+      showSelectionButton.classList.add('esri-button', 'esri-button--secondary');
+
+      // Add event listener for "Show Selection" button
+      showSelectionButton.addEventListener('click', function () {
+        // Get the selected features
+        table.filterBySelection()
+      });
+
+      // Add "Show Selection" button to the table container
+      selectionContener.appendChild(showSelectionButton);
+
+      // Create "Show All" button
+      const showAllButton = document.createElement('button');
+      showAllButton.textContent = 'Show All';
+      showAllButton.classList.add('esri-button', 'esri-button--secondary');
+
+      // Add event listener for "Show All" button
+      showAllButton.addEventListener('click', function () {
+        // Clear any existing selection
+        table.clearSelectionFilter()
+      });
+
+      // Add "Show All" button to the table container
+      selectionContener.appendChild(showAllButton);
+
+      // Create "clear Selection" button
+      const clearSelectionButton = document.createElement('button');
+      clearSelectionButton.textContent = 'Clear Selection';
+      clearSelectionButton.classList.add('esri-button', 'esri-button--secondary');
+
+      // Add event listener for "clear Selection" button
+      clearSelectionButton.addEventListener('click', function () {
+        // Clear any existing selection
+        table.clearSelection()
+      });
+
+      // Add "clear Selection" button to the table container
+      selectionContener.appendChild(clearSelectionButton);
+
+      async function downloadCSV() {
+        const queryParams = {
+          where: "1=1", // Query to retrieve all features (you can adjust this according to your needs)
+          outFields: ["*"] // Specify the fields you want to include in the result
+        };
+
+        // Query features
+        const result = await layer.queryFeatures(queryParams);
+
+        // Get all features from the FeatureTable
+
+        const allFeatures = result.features;
+
+        // Extract attributes from each feature
+        const csvContent = [];
+        csvContent.push(Object.keys(allFeatures[0].attributes).join(',')); // Add headers
+
+        allFeatures.forEach(feature => {
+          const values = Object.values(feature.attributes).map(value => {
+            // Ensure values are properly formatted (e.g., handle commas within values)
+            if (typeof value === 'string') {
+              return `"${value.replace(/"/g, '""')}"`;
+            } else {
+              return value;
+            }
+          });
+          csvContent.push(values.join(','));
+        });
+
+        // Convert to CSV string
+        const csvString = csvContent.join('\n');
+
+        // Download CSV file
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'data.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Create a button to trigger CSV download
+      const downloadCSVButton = document.createElement('button');
+      downloadCSVButton.textContent = 'Download CSV';
+      downloadCSVButton.classList.add('esri-button', 'esri-button--secondary');
+      downloadCSVButton.addEventListener('click', downloadCSV);
+
+      // Add the button to the table container
+      selectionContener.appendChild(downloadCSVButton);
+
+    }
+
+    tablesButtonsForSpatilData(featureTableSites, sitesFinal, "tableDiv-Sites")
+    tablesButtonsForSpatilData(featureTableCells, Cells, "tableDiv-Cells")
+    tablesButtonsForSpatilData(featureTableJammerSites, Cell_Site_Data_Jammer_Sites, "tableDiv-JammerSites")
+    tablesButtonsForTabularData(featureTableOutagesData, featureLayerOutagesData, "tableDiv-OutagesData")
+    tablesButtonsForTabularData(featureTableRFIsFC, RFIsFC, "tableDiv-RFIsFC")
+    tablesButtonsForTabularData(featureTableCCTickets, CCTicketsFCExportFeatures, "tableDiv-CCTicketsFC")
+    tablesButtonsForTabularData(featureTableNMSIncident, featureLayerNMSIncident, "tableDiv-NMSIncident")
+
+    const loaders = document.getElementsByClassName("loader");
+    const buttonaddons = document.getElementsByClassName("button-addon");
+
+    const showLoader = () => {
+
+      Array.from(loaders).forEach((loader) => {
+        loader.style.display = "block";
+      });
+
+      Array.from(buttonaddons).forEach((buttonaddon) => {
+        buttonaddon.style.display = "none";
+      });
+
     };
 
-    const maintentanceRenderer = {
-      type: "unique-value",
-      legendOptions: {
-        title: "maintentance"
-      },
-      field: "maintentance",
-      uniqueValueInfos: [{
-        value: "yes",
-        label: "yes",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "red",
-          outline: null
-        }
-      }, {
-        value: "no",
-        label: "no",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "green",
-          outline: null
-        }
-      }]
+    const hideLoader = () => {
+      Array.from(loaders).forEach((loader) => {
+        loader.style.display = "none";
+      });
+
+      Array.from(buttonaddons).forEach((buttonaddon) => {
+        buttonaddon.style.display = "block";
+      });
+
     };
 
-    const outageRenderer = {
-      type: "unique-value",
-      legendOptions: {
-        title: "outage"
-      },
-      field: "outage",
-      uniqueValueInfos: [{
-        value: "yes",
-        label: "yes",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "red",
-          outline: null
-        }
-      }, {
-        value: "no",
-        label: "no",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "green",
-          outline: null
-        }
-      }]
+    
+    // Add this action to the popup so it is always available in this view
+    const getSitesDetailsAction = {
+      title: "sitesDetails",
+      id: "sitesDetails-this",
     };
+    // Add this action to the popup so it is always available in this view
+    const getCellsDetailsAction = {
+      title: "cellsDetails",
+      id: "cellsDetails-this",
+    };
+
+    const sitesTemplate = {
+      // autocasts as new PopupTemplate()
+      title: "{site_id}",
+      content: [{
+        // Pass in the fields to display
+        type: "fields",
+        fieldInfos: [{
+          fieldName: "site_id",
+          label: "Site ID"
+        }
+          , {
+          fieldName: "ID",
+          label: "ID"
+        }
+          , {
+          fieldName: "plan_longitude",
+          label: "Plan Longitude"
+        }
+          , {
+          fieldName: "plan_latitude",
+          label: "Plan Latitude"
+        }
+        ]
+      }],
+      actions: [getSitesDetailsAction]
+    };
+
+    const cellsTemplate = {
+      // autocasts as new PopupTemplate()
+      title: "{CELLID}",
+      content: [{
+        // Pass in the fields to display
+        type: "fields",
+        fieldInfos: [{
+          fieldName: "UNIQUEID",
+          label: "UNIQUEID"
+        }
+          , {
+          fieldName: "SITEID",
+          label: "SITEID"
+        }
+          , {
+          fieldName: "CELLID",
+          label: "CELLID"
+        }
+          , {
+          fieldName: "SITEX",
+          label: "SITEX"
+        }
+          , {
+          fieldName: "SITEY",
+          label: "SITEY"
+        }
+        ]
+      }],
+      actions: [getCellsDetailsAction]
+    };
+
+    sitesFinal.popupTemplate = sitesTemplate
+    Cells.popupTemplate = cellsTemplate
+    // Execute each time the "Measure Length" is clicked
+    async function getSitesDetails(event) {
+      console.log('event', event);
+      document.getElementById("Data_Container_By_Select").innerHTML = " "
+      layerBlockArray.forEach((block) => {
+        while (block.lastElementChild) {
+          block.removeChild(block.lastElementChild);
+        }
+      });
+      console.log(view.popup);
+      // Call fetchFeatures and pass in the click event location.
+      const fetchFeaturesResponse = await view.popup.features;
+      console.log('fetchFeaturesResponse', fetchFeaturesResponse);
+      // Iterate through the returned graphics once the allGraphicsPromise resolves.
+      // const graphics = await fetchFeaturesResponse.allGraphicsPromise;
+      const graphics = await view.popup.features;
+      if (graphics.length > 0) {
+        graphics.forEach((graphic) => {
+          // For each layer's calcite block, loop through the graphics and add
+          // the graphic to a feature widget into that block.
+          console.log('graphics', graphics);
+          layerBlockArray.forEach((block) => {
+            const layerTitle = graphic.layer.title;
+            if (block.heading === layerTitle) {
+              panel.appendChild(block);
+              const featureChild = new Feature({
+                container: document.createElement("div"),
+                graphic: graphic
+              });
+              block.appendChild(featureChild.container);
+       
+              if (block.id == sitesFinalTitle) {
+
+                siteGeomatry = featureChild.graphic.geometry
+                getSitesFeatureLayer(featureChild.graphic.attributes.site_id)
+                console.log(block);
+              }
+
+            }
+          });
+        });
+      }
+    }
+    async function getCellsDetails(event) {
+      console.log('event', event);
+      document.getElementById("Data_Container_By_Select").innerHTML = " "
+      layerBlockArray.forEach((block) => {
+        while (block.lastElementChild) {
+          block.removeChild(block.lastElementChild);
+        }
+      });
+      console.log(view.popup);
+      // Call fetchFeatures and pass in the click event location.
+      const fetchFeaturesResponse = await view.popup.features;
+      console.log('fetchFeaturesResponse', fetchFeaturesResponse);
+      // Iterate through the returned graphics once the allGraphicsPromise resolves.
+      // const graphics = await fetchFeaturesResponse.allGraphicsPromise;
+      const graphics = await view.popup.features;
+      if (graphics.length > 0) {
+        graphics.forEach((graphic) => {
+          // For each layer's calcite block, loop through the graphics and add
+          // the graphic to a feature widget into that block.
+          console.log('graphics', graphics);
+          layerBlockArray.forEach((block) => {
+            const layerTitle = graphic.layer.title;
+            if (block.heading === layerTitle) {
+              panel.appendChild(block);
+              const featureChild = new Feature({
+                container: document.createElement("div"),
+                graphic: graphic
+              });
+              block.appendChild(featureChild.container);
+              if (block.id == CellsTitle) {
+
+                // console.log(featureChild.graphic.attributes.site_id);
+                getCellsFeatureLayer(featureChild.graphic.attributes.CELLID, featureChild.graphic.attributes.UNIQUEID)
+                console.log(block);
+              }
+
+            }
+          });
+        });
+      }
+    }
+
+    // Event handler that fires each time an action is clicked.
+    reactiveUtils.on(
+      () => view.popup,
+      "trigger-action",
+      (event) => {  // Execute the measureThis() function if the measure-this action is clicked
+        if (event.action.id === "sitesDetails-this") {
+          getSitesDetails(event);
+        } else if (event.action.id === "cellsDetails-this") {
+          getCellsDetails(event)
+        }
+      });
 
     const NumberOfTicketsRenderer = {
       type: "simple",
@@ -260,11 +722,11 @@ require([
       visualVariables: [
         {
           type: "color",
-          field: "number_of_tickets",
+          field: "ccticket_num",
           stops: [
-            { value: 1, color: 'green', label: "1" },
-            { value: 50, color: 'orange', label: "50" },
-            { value: 100, color: 'red', label: "100" }
+            { value: 0, color: 'green', label: "0" },
+            { value: 2, color: 'orange', label: "2" },
+            { value: 5, color: 'red', label: "5" }
           ]
         }
       ]
@@ -281,389 +743,110 @@ require([
       visualVariables: [
         {
           type: "color",
-          field: "number_of_outages",
+          field: "outage_num",
           stops: [
-            { value: 1, color: 'green', label: "1" },
-            { value: 50, color: 'orange', label: "50" },
-            { value: 100, color: 'red', label: "100" }
+            { value: 0, color: 'green', label: "0" },
+            { value: 2, color: 'orange', label: "2" },
+            { value: 5, color: 'red', label: "5" }
           ]
         }
       ]
     };
 
+    const colors = ["#d92b30", "#3cccb4", "#ffdf3c", "#c27c30", "#f260a1"];
 
-    document.getElementById("coverageStatusButton").addEventListener("click", function () {
-      Cells.renderer = coverageStatusRenderer;
-    });
-    document.getElementById("maintentanceButton").addEventListener("click", function () {
-      Cells.renderer = maintentanceRenderer;
-    });
-    document.getElementById("outageButton").addEventListener("click", function () {
-      Cells.renderer = outageRenderer;
-    });
+    const commonProperties = {
+      type: "simple-fill",
+      width: "4px",
+      style: "solid",
+      outline: {
+        color: [0, 0, 0, 1], // Black color with full opacity
+        width: 1 // Adjust the width of the outline as needed
+      }
+    };
+
+    // Symbol for Interstate highways
+    const fwySym = {
+      type: "simple-fill",
+      width: "4px",
+      style: "solid",
+      outline: {
+        color: [255, 165, 0, 1], // Black color with full opacity
+        width: 1 // Adjust the width of the outline as needed
+      },
+      color: [255, 165, 0, 0.20]
+    };
+
+    // Symbol for U.S. Highways
+    const hwySym = {
+      type: "simple-fill",
+      width: "4px",
+      style: "solid",
+      outline: {
+        color: [60, 179, 113, 1], // Black color with full opacity
+        width: 1 // Adjust the width of the outline as needed
+      },
+      color: [60, 179, 113, 0.20]
+    };
+
+    // Symbol for state highways
+    const stateSym = {
+      type: "simple-fill",
+      width: "4px",
+      style: "solid",
+      outline: {
+        color: [180, 0, 255, 1], // Black color with full opacity
+        width: 1 // Adjust the width of the outline as needed
+      },
+      color: [180, 0, 255, 0.20]
+    };
+
+    // Symbol for other major highways
+    const otherSym = {
+      ...commonProperties,
+      color: colors[4]
+    };
+    const hwyRenderer = {
+      type: "unique-value", // autocasts as new UniqueValueRenderer()
+      legendOptions: {
+        title: "Cells By Technology"
+      },
+      defaultSymbol: otherSym,
+      defaultLabel: "Other",
+      field: "technology",
+
+      uniqueValueInfos: [
+        {
+          value: "2G", // code for interstates/freeways
+          symbol: fwySym,
+          label: "2G"
+        },
+        {
+          value: "3G", // code for U.S. highways
+          symbol: hwySym,
+          label: "3G"
+        },
+        {
+          value: "4G", // code for U.S. highways
+          symbol: stateSym,
+          label: "4G"
+        }
+      ]
+
+    };
+
     document.getElementById("NumberOfTicketsButton").addEventListener("click", function () {
       Cells.renderer = NumberOfTicketsRenderer;
     });
     document.getElementById("NumberOutagesRenderer").addEventListener("click", function () {
       Cells.renderer = NumberOutagesRenderer;
     });
-    function gitTotalAllRFIAndCCTickets() {
-      RFIsFC.when(function () {
-        RFIsFC.queryFeatureCount().then(function (count) {
-          console.log("Total number of features:", count);
-          // You can display this number wherever you want, for example:
-          document.getElementById("totalRFI").innerText = count;
-        }).catch(function (error) {
-          console.error("Error getting feature count:", error);
-        });
-      });
-      CCTicketsFCExportFeatures.when(function () {
-        CCTicketsFCExportFeatures.queryFeatureCount().then(function (count) {
-          console.log("Total number of features:", count);
-          // You can display this number wherever you want, for example:
-          document.getElementById("totalCCTickets").innerText = count;
-        }).catch(function (error) {
-          console.error("Error getting feature count:", error);
-        });
-      });
-    }
-    gitTotalAllRFIAndCCTickets()
-    //  console.log("to get 10 :",map.layers.getItemAt(10).title);
-    sitesFinal.popupTemplate = {
-      title: "{site_id}",
-      outFields: ["*"],
-      returnGeometry: true,
-      fieldInfos: [
-        {
-          fieldName: "site_id",
-          label: "Site ID:"
-        },
-        {
-          fieldName: "ID",
-          label: "ID:"
-        }
-        ,
-        {
-          fieldName: "plan_latitude",
-          label: "Latitude:"
-        }
-        ,
-        {
-          fieldName: "plan_longitude",
-          label: "Longitude:"
-        }
-      ],
-      content: [
-        // Add FieldContent to popup template.
-        {
-          type: "fields"
-        },
-        // Create RelationshipContent with the relationship between
-        // the units and fires.
-        // {
-        //   type: "relationship",
-        //   // The numeric ID value for the defined relationship on the service.
-        //   // This can be found on the service.
-        //   relationshipId: 0,
-        //   description: "",
-        //   // Display two related fire features in the list of related features.
-        //   displayCount: 1,
-        //   title: "Maintenance Site Operation Data",
-        //   // Order the related features by the 'GIS_ACRES' in descending order.
-        //   orderByFields: {
-        //     field: "site_id",
-        //     order: "desc"
-        //   }
-        // },
-        // // Create RelationshipContent with the relationship between
-        // // the units and wildfire protection facility statistics table.
-        {
-          type: "relationship",
-          relationshipId: 1,
-          description: "",
-          // Display only the one unit
-          displayCount: 1,
-          title: "Outages Data",
-          // Order list of related records by the 'NAME' field in ascending order.
-          orderByFields: {
-            field: "site_id",
-            order: "asc"
-          }
-        },
-      ]
-    }
-    // HPSMTickets.popupTemplate = {
-    //   title: "{phone_number}",
-    //   outFields: ["*"],
-    //   returnGeometry: true,
-    //   fieldInfos: [
-    //     {
-    //       fieldName: "im_id",
-    //       label: "Im ID:",
-    //     },
-    //     {
-    //       fieldName: "phone_number",
-    //       label: "Phone Number:"
-    //     },
-    //     {
-    //       fieldName: "sd_id",
-    //       label: "SD ID:"
-    //     },
-    //     {
-    //       fieldName: "sd_open_time",
-    //       label: "SD Open Time:"
-    //     },
-    //     {
-    //       fieldName: "sd_opened_by",
-    //       label: "SD Opened By:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "sd",
-    //       label: "SD:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "sd_status",
-    //       label: "SD Status:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "area",
-    //       label: "Area:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "subcategory",
-    //       label: "Subcategory:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "sd_close_time",
-    //       label: "SD Close Time:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "sd_resolution_time",
-    //       label: "SD Resolution Time:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "general_outage",
-    //       label: "General Outage"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "sla_status",
-    //       label: "Sla Status:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "affected_service",
-    //       label: "Affected Service:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "gouvernorate",
-    //       label: "Gouvernorate:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "resolution",
-    //       label: "Resolution:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "resolution_code",
-    //       label: "Resolution Code:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "cell_id",
-    //       label: "Cell ID:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "cell_name",
-    //       label: "Cell Name:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "siteid",
-    //       label: "Siteid:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "customer_segment",
-    //       label: "Customer Segment:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "sitename",
-    //       label: "Sitename:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "reopened",
-    //       label: "Reopened:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "resolved_by",
-    //       label: "Resolved by:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "region",
-    //       label: "Region:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "resolved_by",
-    //       label: "Resolved By:"
-    //     }
-    //     ,
-    //     {
-    //       fieldName: "expected_resolution_date",
-    //       label: "Expected Resolution Date:"
-    //     }
-    //   ],
-    //   content: [
-    //     // Add FieldContent to popup template.
-    //     {
-    //       type: "fields"
-    //     },
-    //     // Create RelationshipContent with the relationship between
-    //     // the units and fires.
-    //     {
-    //       type: "relationship",
-    //       // The numeric ID value for the defined relationship on the service.
-    //       // This can be found on the service.
-    //       relationshipId: 4,
-    //       description: "",
-    //       // Display two related fire features in the list of related features.
-    //       displayCount: 1,
-    //       title: "Maintenance Site Operation Data",
-    //       // Order the related features by the 'GIS_ACRES' in descending order.
-    //       orderByFields: {
-    //         field: "site_id",
-    //         order: "desc"
-    //       }
-    //     },
-    //     // // Create RelationshipContent with the relationship between
-    //     // // the units and wildfire protection facility statistics table.
-    //     {
-    //       type: "relationship",
-    //       relationshipId: 5,
-    //       description: "",
-    //       // Display only the one unit
-    //       displayCount: 1,
-    //       title: "Outages Data",
-    //       // Order list of related records by the 'NAME' field in ascending order.
-    //       orderByFields: {
-    //         field: "site_id",
-    //         order: "asc"
-    //       }
-    //     },
-    //   ]
-    // }
-    // map.layers.getItemAt(5).popupTemplate = {
-    //   title: "{site_name}",
-    //   outFields: ["*"],
-    //   returnGeometry: true,
-    //   fieldInfos: [
-    //     {
-    //       fieldName: "site_id",
-    //       label: "Site ID:"
-    //     },
-    //     {
-    //       fieldName: "site_name",
-    //       label: "site name:"
-    //     },
-    //     {
-    //       fieldName: "latitude",
-    //       label: "latitude:"
-    //     },
-    //     {
-    //       fieldName: "longitude",
-    //       label: "latitude:"
-    //     },
-    //     {
-    //       fieldName: "covergae_area_id",
-    //       label: "covergae area id:"
-    //     },
-    //     {
-    //       fieldName: "coverage_status",
-    //       label: "coverage status:"
-    //     },
-    //     {
-    //       fieldName: "coverage_status_date_time",
-    //       label: "coverage status date time:"
-    //     },
-    //     {
-    //       fieldName: "coverage_location",
-    //       label: "coverage location:"
-    //     },
-    //     {
-    //       fieldName: "cgi",
-    //       label: "cgi:"
-    //     },
-    //     {
-    //       fieldName: "outage",
-    //       label: "outage:"
-    //     },
-    //     {
-    //       fieldName: "maintentance",
-    //       label: "maintentance:"
-    //     },
-    //     {
-    //       fieldName: "gov",
-    //       label: "gov:"
-    //     },
-    //     {
-    //       fieldName: "network_type",
-    //       label: "network type:"
-    //     },
-    //   ],
-    //   content: [
-    //     // Add FieldContent to popup template.
-    //     {
-    //       type: "fields"
-    //     },
-    //     // Create RelationshipContent with the relationship between
-    //     // the units and fires.
-    //     {
-    //       type: "relationship",
-    //       // The numeric ID value for the defined relationship on the service.
-    //       // This can be found on the service.
-    //       relationshipId: 2,
-    //       description: "",
-    //       // Display two related fire features in the list of related features.
-    //       displayCount: 1,
-    //       title: "Sites Data",
-    //       // Order the related features by the 'GIS_ACRES' in descending order.
-    //       orderByFields: {
-    //         field: "site_id",
-    //         order: "desc"
-    //       }
-    //     },
-    //     // // Create RelationshipContent with the relationship between
-    //     // // the units and wildfire protection facility statistics table.
-    //     {
-    //       type: "relationship",
-    //       relationshipId: 6,
-    //       description: "",
-    //       // Display only the one unit
-    //       displayCount: 1,
-    //       title: "CCTicketsFC Data",
-    //       // Order list of related records by the 'NAME' field in ascending order.
-    //       orderByFields: {
-    //         field: "siteid",
-    //         order: "asc"
-    //       }
-    //     },
-    //   ]
-    // }
+    document.getElementById("netWorkType").addEventListener("click", function () {
+
+      Cells.renderer = hwyRenderer;
+
+    });
+
     // On view click, first remove all the previously added features (if any).
     reactiveUtils.on(
       () => view,
@@ -696,22 +879,7 @@ require([
                   graphic: graphic
                 });
                 block.appendChild(featureChild.container);
-                if (block.id == CellsTitle) {
 
-                  console.log(featureChild.graphic.attributes.CELLID);
-                  getSitesFeatureLayer(featureChild.graphic.attributes.CELLID, featureChild.graphic.attributes.cgi, "select_on_map")
-                  console.log(block);
-                }
-                // block.appendChild(featureChild.container);
-                // If the graphic comes from a feature layer, add a highlight
-                // to that feature using the layerView.highlight method.
-                if (graphic.layer.type === "feature") {
-                  layerViews.forEach((layerView) => {
-                    if (graphic.layer.title === layerView.layer.title) {
-                      //  handles.add(layerView.highlight(graphic));
-                    }
-                  });
-                }
               }
             });
           });
@@ -756,23 +924,17 @@ require([
 
     document.getElementById("clear-selection").addEventListener("click", () => {
       handles.removeAll();
-      featureTableHPSMTickets.highlightIds.removeAll();
+      // featureTableHPSMTickets.highlightIds.removeAll();
       featureTableRFIsFC.highlightIds.removeAll();
       featureTableCCTickets.highlightIds.removeAll();
+      featureTableNMSIncident.highlightIds.removeAll();
       featureTableJammerSites.highlightIds.removeAll();
       featureTableSites.highlightIds.removeAll();
-      // featureTableNetworkCoverage.highlightIds.removeAll();
       featureTableCells.highlightIds.removeAll();
       featureTableOutagesData.highlightIds.removeAll();
 
       document.getElementById("Data_Container_By_Select").innerHTML = " "
-      gitTotalAllRFIAndCCTickets()
-      ChartRFIA(0, "Affected_Service", "chart-RFIAffected");
-      ChartRFIA(0, "SUBCATEGORY", "chart-RFISubcategory");
-      ChartRFIA(0, "PRODUCT_TYPE", "chart-RFIPRODUCTTYPE");
-      ChartCCTickets(0, "affected_service", "chart-CCTicketsAffected");
-      ChartCCTickets(0, "subcategory", "chart-CCTicketsSubcategory");
-      ChartCCTickets(0, "area", "chart-CCTicketsArea");
+
       layerBlockArray.forEach((block) => {
         while (block.lastElementChild) {
           block.removeChild(block.lastElementChild);
@@ -782,7 +944,7 @@ require([
 
     const searchWidget = new Search({
       view: view,
-      allPlaceholder: "Site id Or Phone number",
+      allPlaceholder: "Site ID Or Phone number Or Cell ID",
       includeDefaultSources: false,
       sources: [
         {
@@ -794,23 +956,25 @@ require([
           name: "Sites",
           placeholder: "example: BAG0400"
         },
-        // {
-        //   layer: HPSMTickets,
-        //   searchFields: ["phone_number"],
-        //   displayField: "phone_number",
-        //   exactMatch: false,
-        //   // outFields: ["*"],
-        //   name: "CCTicketsFC",
-        //   placeholder: "example: 010123456789"
-        // },
-        // {
-        //   name: "ArcGIS World Geocoding Service",
-        //   placeholder: "example: Nuuk, GRL",
-        //   apiKey: "AAPK8439fc9a325c4593a3234a4fbafe73caXK2STpUubI24-8zi9egsX2fCBrOdoOUY5qDXEAIHWamfxipss0ffj3zCLo7amIE6"
-        //   ,
-        //   singleLineFieldName: "SingleLine",
-        //   url: "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer"
-        // }
+        {
+          layer: Cells,
+          searchFields: ["CELLID"],
+          displayField: "CELLID",
+          exactMatch: false,
+          // outFields: ["*"],
+          name: "Cells",
+          placeholder: "example: 806575886"
+        },
+        {
+          layer: Cells,
+          searchFields: ["phon_num"],
+          displayField: "phon_num",
+          exactMatch: false,
+          // outFields: ["*"],
+          name: "CCTicketsFC",
+          placeholder: "example: 010123456789"
+        },
+
       ]
     });
 
@@ -826,10 +990,12 @@ require([
     // create the measurement widgets and hide them by default
     const distanceMeasurement2D = new DistanceMeasurement2D({
       view,
+      unit: "kilometers", // Set unit to kilometers
       visible: false
     });
     const areaMeasurement2D = new AreaMeasurement2D({
       view,
+      unit: "square-kilometers", // Set unit to square kilometers for area measurement
       visible: false
     });
 
@@ -913,22 +1079,6 @@ require([
       view: view
     });
 
-    view.ui.add(
-      [
-        new Expand({
-          content: new Print({
-            view: view,
-            // specify your own print service
-            printServiceUrl:
-              "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
-          }),
-          view: view,
-          group: "top-right"
-        }),
-      ],
-      "top-right"
-    );
-
     const applicationDiv = document.getElementById("applicationDiv");
 
     view.ui.add(
@@ -943,1886 +1093,1499 @@ require([
     // Add the Compass widget to the top left corner of the view
     view.ui.add(compassWidget, "top-right");
 
+    function getSitesFeatureLayer(site_id) {
 
-    // const typeSelect = document.getElementById("type-select");
+      document.getElementById("Data_Container_By_Select").innerHTML = ' '
+      console.log("site id", site_id);
+      if (site_id) {
 
-    // typeSelect.addEventListener("change", async () => {
-    //   const value = typeSelect.value;
-    //   // const layerHPSM = map.layers.getItemAt(6);
-    //   // const CCTicketsFCExportFeatures = map.layers.getItemAt(9);
-    //   await HPSMTickets.load();
-    //   await CCTicketsFCExportFeatures.load();
-    //   // Create an array of layerViews to be able to highlight selected features.
-    //   if (HPSMTickets.type === "feature") {
-    //     // const layerView = await view.whenLayerView(layer);
-
-    //     HPSMTickets.definitionExpression =
-    //       value === "all"
-    //         ? null
-    //         : `sd_status = '${value}'`
-
-    //   }
-    //   if (CCTicketsFCExportFeatures.type === "feature") {
-    //     // const layerViewCCTicketsFC = await view.whenLayerView(layerCCTicketsFC);
-
-    //     CCTicketsFCExportFeatures.definitionExpression =
-    //       value === "all"
-    //         ? null
-    //         : `sd_status = '${value}'`
-
-    //   }
-    //   // });
-    // });
-
-
-
-
-    document.getElementById("SearchBTN").addEventListener("click", searchOnMap);
-
-    function searchOnMap() {
-      var addressVar = document.getElementById("SearchInput").value
-      // console.log(addressVar);
-      const geocodingServiceUrl = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
-
-      const params = {
-        address: {
-          "address": addressVar
-        }
-      }
-
-      locator.addressToLocations(geocodingServiceUrl, params).then((results) => {
-
-        showResult(results);
-      });
-
-
-      function showResult(results) {
-        if (results.length) {
-          var query = results[0];
-          // console.log(query);
-          const result = results[0];
-          // console.log(result.location.longitude.toFixed(5) + "," + result.location.latitude.toFixed(5))
-          view.graphics.add(new Graphic({
-            symbol: {
-              type: "simple-marker",
-              color: "#000000",
-              size: "8px",
-              outline: {
-                color: "#ffffff",
-                width: "1px"
-              }
-            },
-            geometry: result.location,
-            attributes: {
-              title: "Address",
-              address: result.address,
-              score: result.score
-            },
-            popupTemplate: {
-              title: "{title}",
-              content: result.address + "<br><br>" + result.location.longitude.toFixed(5) + "," + result.location.latitude.toFixed(5)
-            }
-          }
-          ));
-          if (results.length) {
-            const g = view.graphics.getItemAt(view.graphics._items.length - 1);
-            view.openPopup({
-              features: [g],
-              location: g.geometry
-            });
-            getDitalls(g.geometry)
-          }
-          view.goTo({
-            target: result.location,
-            zoom: 13
-          });
-        }
-      }
-    };
-
-    function getDitalls(point) {
-
-      var query = Cells.createQuery();
-
-      // Set the geometry for the query
-      query.geometry = point;
-
-      // Execute the query
-      Cells.queryFeatures(query).then(function (result) {
-        // Check if any features were found
-        if (result.features.length > 0) {
-          var polygon = result.features[result.features.length - 1]; // Assuming you want the first polygon if there are multiple intersections
-          // Do something with the polygon, e.g., access attributes: polygon.attributes
-          // console.log(polygon.attributes.site_id);
-          getSitesFeatureLayer(polygon.attributes.CELLID, polygon.attributes.cgi,  "search")
-        } else {
-          // console.log("Point is not within any polygon.");
-          document.getElementById("Data_Container_By_Search").innerHTML = `<h3 style="color:gray"> No Data Found </h3>`
-        }
-      }).catch(function (error) {
-        console.error("Error during query: ", error);
-      });
-    }
-
-    // Define the query parameters
-    function getSitesFeatureLayer(cell_id, cgi, caller) {
-
-      document.getElementById("Data_Container_By_Search").innerHTML = ` `
-      document.getElementById("Data_Container_By_Select").innerHTML = ` `
-      console.log("ffffff", cell_id);
-      if (cell_id) {
-
-        var queryParamsForCells = {
-          where: `CELLID = '${cell_id}'`, // Specify your query criteria
+        const queryParamsOutages = {
+          where: `site_id = '${site_id}'`, // Specify your query criteria
           outFields: ["*"] // Specify the fields you want to retrieve
         };
-        var queryParamsForMaintenanceAndOutagesData = {
+        const queryCC = {
+          where: `siteid = '${site_id}'`, // Specify your query criteria
+          outFields: ["*"] // Specify the fields you want to retrieve
+        };
+
+        const queryCells = {
+          where: `SITEID = '${site_id}'`, // Specify your query criteria
+          outFields: ["*"] // Specify the fields you want to retrieve
+        };
+        const queryNMSIncident = {
+          where: `ASIA_SITEID = '${site_id}'`, // Specify your query criteria
+          outFields: ["*"] // Specify the fields you want to retrieve
+        };
+
+        //  // Execute the query
+
+        featureLayerOutagesData.queryFeatures(queryParamsOutages)
+          .then(function (result) {
+            // Handle the query result
+            if (result.features.length > 0) {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingThree">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+               Outages
+             </button>
+           </h2>
+           <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseThreeBodySelect">
+             </div>
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableOutagesData.highlightIds.includes(objectId)) {
+                  featureTableOutagesData.highlightIds.add(objectId);
+                }
+                const clearanceTimeDateObj = new Date(element.attributes.clearance_time);
+                const closeTimeDateObj = new Date(element.attributes.close_time);
+                document.getElementById("collapseThreeBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">Incident ID: ${element.attributes.incident_id ? element.attributes.incident_id : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>Affected Sector: </th>
+               <td> ${element.attributes.affected_sector ? element.attributes.affected_sector : " "}</td>
+             </tr>
+             <tr>
+               <th>Affectedobject: </th>
+               <td> ${element.attributes.affectedobject ? element.attributes.affectedobject : " "}</td>
+             </tr>
+             <tr>
+               <th>Alarm Number: </th>
+               <td> ${element.attributes.alarm_number ? element.attributes.alarm_number : " "}</td>
+             </tr>
+             <tr>
+               <th>Alarm Severity: </th>
+               <td> ${element.attributes.alarm_severity ? element.attributes.alarm_severity : " "}</td>
+             </tr>
+             <tr>
+               <th>Assignment: </th>
+               <td> ${element.attributes.assignment ? element.attributes.assignment : " "}</td>
+             </tr>
+           
+             <tr>
+               <th>Clearance Time: </th>
+               <td> ${clearanceTimeDateObj ? clearanceTimeDateObj.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>Close Time: </th>
+               <td> ${closeTimeDateObj ? closeTimeDateObj.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>Cluster: </th>
+               <td> ${element.attributes.cluster ? element.attributes.cluster : " "}</td>
+             </tr>
+             <tr>
+               <th>Duration: </th>
+               <td> ${element.attributes.duration ? element.attributes.duration : " "}</td>
+             </tr>
+             <tr>
+               <th>Element: </th>
+               <td> ${element.attributes.element ? element.attributes.element : " "}</td>
+             </tr>
+             <tr>
+               <th>Incident ID: </th>
+               <td> ${element.attributes.incident_id ? element.attributes.incident_id : " "}</td>
+             </tr>
+             <tr>
+               <th>Kpi Category: </th>
+               <td> ${element.attributes.kpi_category ? element.attributes.kpi_category : " "}</td>
+             </tr>
+             <tr>
+               <th>Kpi Subcategory: </th>
+               <td> ${element.attributes.kpi_subcategory ? element.attributes.kpi_subcategory : " "}</td>
+             </tr>
+             <tr>
+               <th>NE Name: </th>
+               <td> ${element.attributes.ne_name ? element.attributes.ne_name : " "}</td>
+             </tr>
+             <tr>
+               <th>Notification ID: </th>
+               <td> ${element.attributes.notification_id ? element.attributes.notification_id : " "}</td>
+             </tr>
+             <tr>
+               <th>Open Time: </th>
+               <td> ${element.attributes.open_time ? element.attributes.open_time : " "}</td>
+             </tr>
+             <tr>
+               <th>Original_event Time: </th>
+               <td> ${element.attributes.original_event_time ? element.attributes.original_event_time : " "}</td>
+             </tr>
+             <tr>
+               <th>Problem Category: </th>
+               <td> ${element.attributes.problem_category ? element.attributes.problem_category : " "}</td>
+             </tr>
+             <tr>
+               <th>Province City: </th>
+               <td> ${element.attributes.province_city ? element.attributes.province_city : " "}</td>
+             </tr>
+             <tr>
+               <th>Reason: </th>
+               <td> ${element.attributes.reason ? element.attributes.reason : " "}</td>
+             </tr>
+             <tr>
+               <th>Resolution: </th>
+               <td> ${element.attributes.resolution ? element.attributes.resolution : " "}</td>
+             </tr>
+             <tr>
+               <th>Resolution Code: </th>
+               <td> ${element.attributes.resolution_code ? element.attributes.resolution_code : " "}</td>
+             </tr>
+             <tr>
+               <th>Service Affected: </th>
+               <td> ${element.attributes.service_affected ? element.attributes.service_affected : " "}</td>
+             </tr>
+             <tr>
+               <th>Site ID: </th>
+               <td> ${element.attributes.site_id ? element.attributes.site_id : " "}</td>
+             </tr>
+             <tr>
+               <th>Site Name: </th>
+               <td> ${element.attributes.site_name ? element.attributes.site_name : " "}</td>
+             </tr>
+             <tr>
+               <th>Status: </th>
+               <td> ${element.attributes.status ? element.attributes.status : " "}</td>
+             </tr>
+             <tr>
+               <th>Update Time: </th>
+               <td> ${element.attributes.update_time ? element.attributes.update_time : " "}</td>
+             </tr>
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
+              }
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No Outages Found
+            </button>`
+            }
+          })
+          .catch(function (error) {
+            // Handle errors
+            console.error("Error performing query:", error);
+          });
+
+        CCTicketsFCExportFeatures.queryFeatures(queryCC)
+          .then(function (result) {
+            if (result.features.length > 0) {
+              // Handle the query result
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingCCTickets">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCCTickets" aria-expanded="false" aria-controls="collapseCCTickets">
+             CC Tickets
+             </button>
+           </h2>
+           <div id="collapseCCTickets" class="accordion-collapse collapse" aria-labelledby="headingCCTickets" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseCCTicketsBodySelect"}>
+             </div>
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
+
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableCCTickets.highlightIds.includes(objectId)) {
+                  featureTableCCTickets.highlightIds.add(objectId);
+                }
+                let sdOpenTime = new Date(element.attributes.sd_open_time);
+                let SD = new Date(element.attributes.sd);
+                let imOpenTime = new Date(element.attributes.im_open_time);
+                let sdCloseTime = new Date(element.attributes.sd_close_time);
+                let sdResolutionTime = new Date(element.attributes.sd_resolution_time);
+                let problemTime = new Date(element.attributes.problem_time);
+                document.getElementById("collapseCCTicketsBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">CGI: ${element.attributes.cgi ? element.attributes.cgi : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>IM ID: </th>
+               <td> ${element.attributes.im_id ? element.attributes.im_id : " "}</td>
+             </tr>
+             <tr>
+               <th>SD ID: </th>
+               <td> ${element.attributes.sd_id ? element.attributes.sd_id : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Group: </th>
+               <td> ${element.attributes.im_group ? element.attributes.im_group : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Open Time: </th>
+               <td> ${sdOpenTime ? sdOpenTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Opened By: </th>
+               <td> ${element.attributes.sd_opened_by ? element.attributes.sd_opened_by : " "}</td>
+             </tr>
+             <tr>
+               <th>SD: </th>
+               <td> ${SD ? SD.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Opened By: </th>
+               <td> ${element.attributes.im_opened_by ? element.attributes.im_opened_by : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Status: </th>
+               <td> ${element.attributes.sd_status ? element.attributes.sd_status : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Status: </th>
+               <td> ${element.attributes.im__status ? element.attributes.im__status : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Open Time: </th>
+               <td> ${imOpenTime ? imOpenTime.toUTCString() : " "}</td>
+             </tr>
+          
+             <tr>
+               <th>Subcategory: </th>
+               <td> ${element.attributes.subcategory ? element.attributes.subcategory : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Close Time: </th>
+               <td> ${sdCloseTime ? sdCloseTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Resolution Time: </th>
+               <td> ${sdResolutionTime ? sdResolutionTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>Problem Time: </th>
+               <td> ${problemTime ? problemTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+             <th>cc slt: </th>
+             <td> ${element.attributes.cc_slt ? element.attributes.cc_slt : " "}</td>
+           </tr>
+             <tr>
+             <th>Cemu Ola Status: </th>
+             <td> ${element.attributes.cemu_ola_status ? element.attributes.cemu_ola_status : " "}</td>
+           </tr>
+             <tr>
+             <th>General Outages: </th>
+             <td> ${element.attributes.general_outage ? element.attributes.general_outage : " "}</td>
+            </tr>
+             <tr>
+             <th>Sla Status: </th>
+             <td> ${element.attributes.sla_status ? element.attributes.sla_status : " "}</td>
+            </tr>
+             <tr>
+             <th>Affected Service: </th>
+             <td> ${element.attributes.affected_service ? element.attributes.affected_service : " "}</td>
+            </tr>
+             <tr>
+             <th>Gouvernorate: </th>
+             <td> ${element.attributes.gouvernorate ? element.attributes.gouvernorate : " "}</td>
+            </tr>
+             <tr>
+             <th>Resolution: </th>
+             <td> ${element.attributes.resolution ? element.attributes.resolution : " "}</td>
+            </tr>
+             <tr>
+             <th>Asia Bscs Rate Plan: </th>
+             <td> ${element.attributes.asia_bscs_rate_plan ? element.attributes.asia_bscs_rate_plan : " "}</td>
+            </tr>
+             <tr>
+             <th>Asia Bscs Balance: </th>
+             <td> ${element.attributes.asia_bscs_balance ? element.attributes.asia_bscs_balance : " "}</td>
+            </tr>
+             <tr>
+             <th>Resolution Code: </th>
+             <td> ${element.attributes.resolution_code ? element.attributes.resolution_code : " "}</td>
+            </tr>
+             <tr>
+             <th>Category: </th>
+             <td> ${element.attributes.category ? element.attributes.category : " "}</td>
+            </tr>
+             <tr>
+             <th>Description: </th>
+             <td> ${element.attributes.description ? element.attributes.description : " "}</td>
+            </tr>
+             <tr>
+             <th>Cemu Comment: </th>
+             <td> ${element.attributes.cemu_comment ? element.attributes.cemu_comment : " "}</td>
+            </tr>
+             <tr>
+             <th>Escalate Ticket: </th>
+             <td> ${element.attributes.escalate_ticket ? element.attributes.escalate_ticket : " "}</td>
+            </tr>
+             <tr>
+             <th>Contact Msisdn: </th>
+             <td> ${element.attributes.contact_msisdn ? element.attributes.contact_msisdn : " "}</td>
+            </tr>
+             <tr>
+             <th>Cell ID: </th>
+             <td> ${element.attributes.cell_id ? element.attributes.cell_id : " "}</td>
+            </tr>
+             <tr>
+             <th>Msisdn: </th>
+             <td> ${element.attributes.msisdn ? element.attributes.msisdn : " "}</td>
+            </tr>
+             <tr>
+             <th>Cell Name: </th>
+             <td> ${element.attributes.cell_name ? element.attributes.cell_name : " "}</td>
+            </tr>
+             <tr>
+             <th>Site ID: </th>
+             <td> ${element.attributes.siteid ? element.attributes.siteid : " "}</td>
+            </tr>
+            </tr>
+             <tr>
+             <th>Customer Segment: </th>
+             <td> ${element.attributes.customer_segment ? element.attributes.customer_segment : " "}</td>
+            </tr>
+             <tr>
+             <th>Site Name: </th>
+             <td> ${element.attributes.sitename ? element.attributes.sitename : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC: </th>
+             <td> ${element.attributes.cmc ? element.attributes.cmc : " "}</td>
+            </tr>
+             <tr>
+             <th>Reopened: </th>
+             <td> ${element.attributes.reopened ? element.attributes.reopened : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC waiting: </th>
+             <td> ${element.attributes.cmc_waiting ? element.attributes.cmc_waiting : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC ID: </th>
+             <td> ${element.attributes.cmc_id ? element.attributes.cmc_id : " "}</td>
+            </tr>
+             <tr>
+             <th>Closed By ID: </th>
+             <td> ${element.attributes.closed_by_id ? element.attributes.closed_by_id : " "}</td>
+            </tr>
+             <tr>
+             <th>Region: </th>
+             <td> ${element.attributes.region ? element.attributes.region : " "}</td>
+            </tr>
+             <tr>
+             <th>Resolve By: </th>
+             <td> ${element.attributes.resolved_by ? element.attributes.resolved_by : " "}</td>
+            </tr>
+             <tr>
+             <th>Expected Resolution Date: </th>
+             <td> ${element.attributes.expected_resolution_date ? element.attributes.expected_resolution_date : " "}</td>
+            </tr>
+             <tr>
+             <th>Auto Governorate: </th>
+             <td> ${element.attributes.auto_governorate ? element.attributes.auto_governorate : " "}</td>
+            </tr>
+             <tr>
+             <th>Channel: </th>
+             <td> ${element.attributes.channel ? element.attributes.channel : " "}</td>
+            </tr>
+             <tr>
+             <th>Phone Number: </th>
+             <td> ${element.attributes.phone_number ? element.attributes.phone_number : " "}</td>
+            </tr>
+             <tr>
+             <th>CGI: </th>
+             <td> ${element.attributes.cgi ? element.attributes.cgi : " "}</td>
+            </tr>
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
+              }
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No CC Tickets Found
+            </button>`
+            }
+          })
+          .catch(function (error) {
+            // Handle errors
+            document.getElementById("Data_Container_By_Select").innerHTML += `
+             <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+             No CC Tickets Found
+             </button>`
+            console.error("Error performing query:", error);
+
+          });
+
+        Cells.queryFeatures(queryCells)
+          .then(function (result) {
+            if (result.features.length > 0) {
+              // Handle the query result
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingCells">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCells" aria-expanded="false" aria-controls="collapseCells">
+             Cells
+             </button>
+           </h2>
+           <div id="collapseCells" class="accordion-collapse collapse" aria-labelledby="headingCells" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseCellsBodySelect"}>
+             </div>
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableCells.highlightIds.includes(objectId)) {
+                  featureTableCells.highlightIds.add(objectId);
+                }
+                document.getElementById("collapseCellsBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">UNIQUEID: ${element.attributes.UNIQUEID ? element.attributes.UNIQUEID : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>SITEID: </th>
+               <td> ${element.attributes.SITEID ? element.attributes.SITEID : " "}</td>
+             </tr>
+             <tr>
+               <th>CELLID: </th>
+               <td> ${element.attributes.CELLID ? element.attributes.CELLID : " "}</td>
+             </tr>
+             <tr>
+               <th>SITEX: </th>
+               <td> ${element.attributes.SITEX ? element.attributes.SITEX : " "}</td>
+             </tr>
+       
+             <tr>
+               <th>SITEY: </th>
+               <td> ${element.attributes.SITEY ? element.attributes.SITEY : " "}</td>
+             </tr>
+        
+             <tr>
+               <th>AZIMUTH: </th>
+               <td> ${element.attributes.AZIMUTH ? element.attributes.AZIMUTH : " "}</td>
+             </tr>
+             <tr>
+               <th>AZIMSRC: </th>
+               <td> ${element.attributes.AZIMSRC ? element.attributes.AZIMSRC : " "}</td>
+             </tr>
+             <tr>
+               <th>BEAMWIDTH: </th>
+               <td> ${element.attributes.BEAMWIDTH ? element.attributes.BEAMWIDTH : " "}</td>
+             </tr>
+
+             <tr>
+               <th>BEAMSRC: </th>
+               <td> ${element.attributes.BEAMSRC ? element.attributes.BEAMSRC : " "}</td>
+             </tr>
+             <tr>
+             <th>RADIUS: </th>
+             <td> ${element.attributes.RADIUS ? element.attributes.RADIUS : " "}</td>
+           </tr>
+             <tr>
+             <th>RADIUSUNIT: </th>
+             <td> ${element.attributes.RADIUSUNIT ? element.attributes.RADIUSUNIT : " "}</td>
+           </tr>
+             <tr>
+             <th>RADIUSSRC: </th>
+             <td> ${element.attributes.RADIUSSRC ? element.attributes.RADIUSSRC : " "}</td>
+            </tr>
+             <tr>
+             <th>ID: </th>
+             <td> ${element.attributes.id ? element.attributes.id : " "}</td>
+            </tr>
+             <tr>
+             <th>Number Cab: </th>
+             <td> ${element.attributes.number_cab ? element.attributes.number_cab : " "}</td>
+            </tr>
+             <tr>
+             <th>Site Name: </th>
+             <td> ${element.attributes.site_name ? element.attributes.site_name : " "}</td>
+            </tr>
+             <tr>
+             <th>Area: </th>
+             <td> ${element.attributes.areaa ? element.attributes.areaa : " "}</td>
+            </tr>
+             <tr>
+             <th>Cell Name: </th>
+             <td> ${element.attributes.cell_name ? element.attributes.cell_name : " "}</td>
+            </tr>
+             <tr>
+             <th>Full Name: </th>
+             <td> ${element.attributes.full_name ? element.attributes.full_name : " "}</td>
+            </tr>
+             <tr>
+             <th>BSC Name: </th>
+             <td> ${element.attributes.bsc_name ? element.attributes.bsc_name : " "}</td>
+            </tr>
+             <tr>
+             <th>BSC Region: </th>
+             <td> ${element.attributes.bsc_region ? element.attributes.bsc_region : " "}</td>
+            </tr>
+             <tr>
+             <th>BSC Provin: </th>
+             <td> ${element.attributes.bsc_provin ? element.attributes.bsc_provin : " "}</td>
+            </tr>
+             <tr>
+             <th>Clutter: </th>
+             <td> ${element.attributes.clutter ? element.attributes.clutter : " "}</td>
+            </tr>
+             <tr>
+             <th>Phase Year: </th>
+             <td> ${element.attributes.phase_year ? element.attributes.phase_year : " "}</td>
+            </tr>
+             <tr>
+             <th>Phase Numb: </th>
+             <td> ${element.attributes.phase_numb ? element.attributes.phase_numb : " "}</td>
+            </tr>
+             <tr>
+             <th>status: </th>
+             <td> ${element.attributes.status ? element.attributes.status : " "}</td>
+            </tr>
+             <tr>
+             <th>priority: </th>
+             <td> ${element.attributes.priority ? element.attributes.priority : " "}</td>
+            </tr>
+             <tr>
+             <th>Search RIN: </th>
+             <td> ${element.attributes.search_rin ? element.attributes.search_rin : " "}</td>
+            </tr>
+             <tr>
+             <th>Remark: </th>
+             <td> ${element.attributes.remark ? element.attributes.remark : " "}</td>
+            </tr>
+            </tr>
+             <tr>
+             <th>RF Region: </th>
+             <td> ${element.attributes.rf_region ? element.attributes.rf_region : " "}</td>
+            </tr>
+             <tr>
+             <th>RF Provinc: </th>
+             <td> ${element.attributes.rf_provinc ? element.attributes.rf_provinc : " "}</td>
+            </tr>
+             <tr>
+             <th>Site Type: </th>
+             <td> ${element.attributes.site_type ? element.attributes.site_type : " "}</td>
+            </tr>
+             <tr>
+             <th>IN OUT: </th>
+             <td> ${element.attributes.in_out ? element.attributes.in_out : " "}</td>
+            </tr>
+             <tr>
+             <th>Cell Vendo: </th>
+             <td> ${element.attributes.cell_vendo ? element.attributes.cell_vendo : " "}</td>
+            </tr>
+             <tr>
+             <th>BTS Type: </th>
+             <td> ${element.attributes.bts_type ? element.attributes.bts_type : " "}</td>
+            </tr>
+             <tr>
+             <th>Band Type: </th>
+             <td> ${element.attributes.band_type ? element.attributes.band_type : " "}</td>
+            </tr>
+             <tr>
+             <th>TRX NUM: </th>
+             <td> ${element.attributes.trx_num ? element.attributes.trx_num : " "}</td>
+            </tr>
+             <tr>
+             <th>CU Type: </th>
+             <td> ${element.attributes.cu_type ? element.attributes.cu_type : " "}</td>
+            </tr>
+             <tr>
+             <th>District: </th>
+             <td> ${element.attributes.district ? element.attributes.district : " "}</td>
+            </tr>
+             <tr>
+             <th>Edge: </th>
+             <td> ${element.attributes.edge ? element.attributes.edge : " "}</td>
+            </tr>
+             <tr>
+             <th>Sector NUM: </th>
+             <td> ${element.attributes.sector_num ? element.attributes.sector_num : " "}</td>
+            </tr>
+             <tr>
+             <th>LAC: </th>
+             <td> ${element.attributes.lac ? element.attributes.lac : " "}</td>
+            </tr>
+             <tr>
+             <th>Vendor Ant: </th>
+             <td> ${element.attributes.vendor_ant ? element.attributes.vendor_ant : " "}</td>
+            </tr>
+             <tr>
+             <th>Antenna TY: </th>
+             <td> ${element.attributes.antenna_ty ? element.attributes.antenna_ty : " "}</td>
+            </tr>
+             <tr>
+             <th>Antenna HE: </th>
+             <td> ${element.attributes.antenna_he ? element.attributes.antenna_he : " "}</td>
+            </tr>
+             <tr>
+             <th>Mechanical: </th>
+             <td> ${element.attributes.mechanical ? element.attributes.mechanical : " "}</td>
+            </tr>
+             <tr>
+             <th>Electrical: </th>
+             <td> ${element.attributes.electrical ? element.attributes.electrical : " "}</td>
+            </tr>
+             <tr>
+             <th>Electrical 1: </th>
+             <td> ${element.attributes.electric_1 ? element.attributes.electric_1 : " "}</td>
+            </tr>
+             <tr>
+             <th>Electrical 2: </th>
+             <td> ${element.attributes.electric_2 ? element.attributes.electric_2 : " "}</td>
+            </tr>
+             <tr>
+             <th>Electrical 3: </th>
+             <td> ${element.attributes.electric_3 ? element.attributes.electric_3 : " "}</td>
+            </tr>
+             <tr>
+             <th>Electrical 4: </th>
+             <td> ${element.attributes.electric_4 ? element.attributes.electric_4 : " "}</td>
+            </tr>
+             <tr>
+             <th>Electrical 5: </th>
+             <td> ${element.attributes.electric_5 ? element.attributes.electric_5 : " "}</td>
+            </tr>
+             <tr>
+             <th>Sector STA: </th>
+             <td> ${element.attributes.sector_sta ? element.attributes.sector_sta : " "}</td>
+            </tr>
+             <tr>
+             <th>Antenna GA: </th>
+             <td> ${element.attributes.antenna_ga ? element.attributes.antenna_ga : " "}</td>
+            </tr>
+             <tr>
+             <th>Power Clas: </th>
+             <td> ${element.attributes.power_clas ? element.attributes.power_clas : " "}</td>
+            </tr>
+             <tr>
+             <th>Erip: </th>
+             <td> ${element.attributes.erip ? element.attributes.erip : " "}</td>
+            </tr>
+             <tr>
+             <th>ON Air DAT: </th>
+             <td> ${element.attributes.on_air_dat ? element.attributes.on_air_dat : " "}</td>
+            </tr>
+             <tr>
+             <th>CellC ID HE: </th>
+             <td> ${element.attributes.cell_id_he ? element.attributes.cell_id_he : " "}</td>
+            </tr>
+             <tr>
+             <th>Geo City: </th>
+             <td> ${element.attributes.geo_city ? element.attributes.geo_city : " "}</td>
+            </tr>
+             <tr>
+             <th>Geo Region: </th>
+             <td> ${element.attributes.geo_region ? element.attributes.geo_region : " "}</td>
+            </tr>
+             <tr>
+             <th>Bkey Prs C: </th>
+             <td> ${element.attributes.bkey_prs_c ? element.attributes.bkey_prs_c : " "}</td>
+            </tr>
+             <tr>
+             <th>Sub Distri: </th>
+             <td> ${element.attributes.sub_distri ? element.attributes.sub_distri : " "}</td>
+            </tr>
+             <tr>
+             <th>Technology: </th>
+             <td> ${element.attributes.technology ? element.attributes.technology : " "}</td>
+            </tr>
+             <tr>
+             <th>ECI: </th>
+             <td> ${element.attributes.eci ? element.attributes.eci : " "}</td>
+            </tr>
+             <tr>
+             <th>LAC OR TAC: </th>
+             <td> ${element.attributes.lac_or_tac ? element.attributes.lac_or_tac : " "}</td>
+            </tr>
+             <tr>
+             <th>RAT Type: </th>
+             <td> ${element.attributes.rat_type ? element.attributes.rat_type : " "}</td>
+            </tr>
+             <tr>
+             <th>Enode Bid: </th>
+             <td> ${element.attributes.enode_bid ? element.attributes.enode_bid : " "}</td>
+            </tr>
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
+              }
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No Cells Found
+            </button>`
+            }
+          })
+          .catch(function (error) {
+            // Handle errors
+            document.getElementById("Data_Container_By_Select").innerHTML += `
+             <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+             No Cells Found
+             </button>`
+            console.error("Error performing query:", error);
+
+          });
+        featureLayerNMSIncident.queryFeatures(queryNMSIncident)
+          .then(function (result) {
+            if (result.features.length > 0) {
+              // Handle the query result
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingNMSIncident">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNMSIncident" aria-expanded="false" aria-controls="collapseNMSIncident">
+             NMS Incident
+             </button>
+           </h2>
+           <div id="collapseNMSIncident" class="accordion-collapse collapse" aria-labelledby="headingNMSIncident" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseNMSIncidentBodySelect"}>
+             </div>
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableNMSIncident.highlightIds.includes(objectId)) {
+                  featureTableNMSIncident.highlightIds.add(objectId);
+                }
+                document.getElementById("collapseNMSIncidentBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">Site_ID: ${element.attributes.ASIA_SITEID ? element.attributes.ASIA_SITEID : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>Cell_ID: </th>
+               <td> ${element.attributes.ASIA_CELL_ID ? element.attributes.ASIA_CELL_ID : " "}</td>
+             </tr>
+             <tr>
+               <th>OPEN_TIME: </th>
+               <td> ${element.attributes.OPEN_TIME ? element.attributes.OPEN_TIME : " "}</td>
+             </tr>
+             <tr>
+               <th>CLOSE_TIME: </th>
+               <td> ${element.attributes.CLOSE_TIME ? element.attributes.CLOSE_TIME : " "}</td>
+             </tr>
+       
+             <tr>
+               <th>STATUS: </th>
+               <td> ${element.attributes.STATUS ? element.attributes.STATUS : " "}</td>
+             </tr>
+        
+             <tr>
+               <th>OUTAGE_TYPE: </th>
+               <td> ${element.attributes.OUTAGE_TYPE ? element.attributes.OUTAGE_TYPE : " "}</td>
+             </tr>
+             <tr>
+               <th>AFFECTED_SERVICES: </th>
+               <td> ${element.attributes.AFFECTED_SERVICES ? element.attributes.AFFECTED_SERVICES : " "}</td>
+             </tr>
+             <tr>
+               <th>CATEGORY: </th>
+               <td> ${element.attributes.CATEGORY ? element.attributes.CATEGORY : " "}</td>
+             </tr>
+             <tr>
+               <th>SUBCATEGORY: </th>
+               <td> ${element.attributes.SUBCATEGORY ? element.attributes.SUBCATEGORY : " "}</td>
+             </tr>
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
+              }
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No NMS Incident Found
+            </button>`
+            }
+          })
+          .catch(function (error) {
+            // Handle errors
+            document.getElementById("Data_Container_By_Select").innerHTML += `
+             <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+             No NMS Incident Found
+             </button>`
+            console.error("Error performing query:", error);
+
+          });
+
+      } else {
+        document.getElementById("Data_Container_By_Select").innerHTML = `<h3 style="color:gray"> No Data Found </h3>`
+      }
+    }
+
+    function getCellsFeatureLayer(cell_id, cgi) {
+
+      //  document.getElementById("Data_Container_By_Search").innerHTML =` `
+      document.getElementById("Data_Container_By_Select").innerHTML = ' '
+      console.log("cell_id", cell_id);
+      if (cell_id && cgi) {
+
+        const queryParamsOutages = {
           where: `cell_id = '${cell_id}'`, // Specify your query criteria
           outFields: ["*"] // Specify the fields you want to retrieve
         };
-        var queryParamsRFIAndCCTickets = {
+        const queryCC = {
           where: `cgi = '${cgi}'`, // Specify your query criteria
           outFields: ["*"] // Specify the fields you want to retrieve
         };
-        // Execute the query
+        const queryNMSIncident = {
+          where: `ASIA_CELL_ID = '${cell_id}'`, // Specify your query criteria
+          outFields: ["*"] // Specify the fields you want to retrieve
+        };
 
+        //  // Execute the query
 
-        if (caller == "search") {
-          Cells.queryFeatures(queryParamsForCells)
-            .then(function (result) {
-              // Handle the query result
-              if (result.features.length > 0) {
-                document.getElementById(caller == "search" ? "Data_Container_By_Search" : "Data_Container_By_Select").innerHTML += `
-                <div class="accordion-item">
-                <h2 class="accordion-header" id="headingOne">
-                  <button class="accordion-button fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                    Network Coverage Data
-                  </button>
-                </h2>
-                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                  <div class="accordion-body" id=${caller == "search" ? "collapseOneBodySearch" : "collapseOneBodySelect"}>
-                  </div>
-                </div>
-              </div>
-                `
-   
-                 for (let index = 0; index < result.features.length; index++) {
-                   const element = result.features[index];
-                   document.getElementById(caller == "search" ? "collapseOneBodySearch" : "collapseOneBodySelect").innerHTML += `
-                  <table  class="mt-3 table table-striped table-bordered">
-                  <thead>
-                    <th colspan="2">Site ID: ${element.attributes.site_id ? element.attributes.site_id : " "}</th>
-                  </thead>
-                <tbody>
-                  <tr>
-                    <th>Coverage Status: </th>
-                    <td> ${element.attributes.coverage_status ? element.attributes.coverage_status : " "}</td>
-                  </tr>
-                  <tr>
-                    <th>Coverage Status Date Time: </th>
-                    <td> ${element.attributes.coverage_status_date_time ? element.attributes.coverage_status_date_time : " "}</td>
-                  </tr>
-                  <tr>
-                    <th>Coverage Location: </th>
-                    <td> ${element.attributes.coverage_location ? element.attributes.coverage_location : " "}</td>
-                  </tr>
-                  <tr>
-                    <th>CGI: </th>
-                    <td> ${element.attributes.cgi ? element.attributes.cgi : " "}</td>
-                  </tr>
-                  <tr>
-                    <th>Site Name: </th>
-                    <td> ${element.attributes.site_name ? element.attributes.site_name : " "}</td>
-                  </tr>
-                  <tr>
-                    <th>Latitude: </th>
-                    <td> ${element.attributes.latitude ? element.attributes.latitude : " "}</td>
-                  </tr>
-                  <tr>
-                    <th>Longitude: </th>
-                    <td> ${element.attributes.longitude ? element.attributes.longitude : " "}</td>
-                  </tr>
-          
-                </tbody>
-              </table>
-                `
-                   // console.log("site",element.attributes);
-                 }
-              }else{
-                document.getElementById(caller == "search" ? "Data_Container_By_Search" : "Data_Container_By_Select").innerHTML += `
-                <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
-                No cells Found
-                </button>`
-              }
-
-            }).catch(function (error) {
-              // Handle errors
-              console.error("Error performing query:", error);
-            });
-            CCTicketsFCExportFeatures.queryFeatures(queryParamsRFIAndCCTickets)
-            .then(function (result) {
-              // Check if features are available
-              if (result && result.features) {
-                // Get the total number of features
-                var count = result.features.length;
-                console.log("Total number of features:", count);
-                // Display the count wherever you want
-                document.getElementById("totalCCTickets").innerText = count;
-              } else {
-                console.error("Error: No features found in the result.");
-                document.getElementById("totalCCTickets").innerText = 0;
-              }
-            }).catch(function (error) {
-              console.error("Error querying features:", error);
-            });
-            RFIsFC.queryFeatures(queryParamsRFIAndCCTickets)
-            .then(function (result) {
-              // Check if features are available
-              if (result && result.features) {
-                // Get the total number of features
-                var count = result.features.length;
-                console.log("Total number of features:", count);
-                // Display the count wherever you want
-                document.getElementById("totalRFI").innerText = count;
-              } else {
-                console.error("Error: No features found in the result.");
-                document.getElementById("totalRFI").innerText = 0;
-              }
-            }).catch(function (error) {
-              console.error("Error querying features:", error);
-            });
-        }
-
-        // Execute the query
-        ChartRFIA(cgi, "Affected_Service", "chart-RFIAffected");
-        ChartRFIA(cgi, "SUBCATEGORY", "chart-RFISubcategory");
-        ChartRFIA(cgi, "PRODUCT_TYPE", "chart-RFIPRODUCTTYPE");
-        ChartCCTickets(cgi, "affected_service", "chart-CCTicketsAffected");
-        ChartCCTickets(cgi, "subcategory", "chart-CCTicketsSubcategory");
-        ChartCCTickets(cgi, "area", "chart-CCTicketsArea");
-
-
-          featureLayerMaintenanceSiteOperation.queryFeatures(queryParamsForMaintenanceAndOutagesData)
+        featureLayerOutagesData.queryFeatures(queryParamsOutages)
           .then(function (result) {
-
             // Handle the query result
             if (result.features.length > 0) {
-              document.getElementById(caller == "search" ? "Data_Container_By_Search" : "Data_Container_By_Select").innerHTML += `
-              <div class="accordion-item">
-              <h2 class="accordion-header" id="headingTwo">
-                <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                  Maintenance Site Operation Data
-                </button>
-              </h2>
-              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-                <div class="accordion-body" id=${caller == "search" ? "collapseTwoBodySearch" : "collapseTwoBodySelect"}>
-                </div>
-              </div>
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingThree">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+               Outages
+             </button>
+           </h2>
+           <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseThreeBodySelect">
              </div>
-              `
- 
-             for (let index = 0; index < result.features.length; index++) {
-               const element = result.features[index];
-               var perationDateObj = new Date(element.attributes.peration_date)
-               document.getElementById(caller == "search" ? "collapseTwoBodySearch" : "collapseTwoBodySelect").innerHTML += `
-                <table  class="mt-3 table table-striped table-bordered">
-                <thead>
-                  <th colspan="2">Cell ID: ${element.attributes.cell_id ? element.attributes.cell_id : " "}</th>
-                </thead>
-              <tbody>
-                <tr>
-                  <th>Operation Category: </th>
-                  <td> ${element.attributes.operation_category ? element.attributes.operation_category : " "}</td>
-                </tr>
-                <tr>
-                  <th>Operation ID: </th>
-                  <td> ${element.attributes.operation_id ? element.attributes.operation_id : " "}</td>
-                </tr>
-                <tr>
-                  <th>Operation Name: </th>
-                  <td> ${element.attributes.operation_name ? element.attributes.operation_name : " "}</td>
-                </tr>
-                <tr>
-                  <th>Peration Date: </th>
-                  <td> ${perationDateObj ? perationDateObj.toUTCString() : " "}</td>
-                </tr>
-                <tr>
-                  <th>Site ID: </th>
-                  <td> ${element.attributes.site_id ? element.attributes.site_id : " "}</td>
-                </tr>
-                <tr>
-                  <th>Status: </th>
-                  <td> ${element.attributes.status ? element.attributes.status : " "}</td>
-                </tr>
-              </tbody>
-            </table>
-              `
-               // console.log("MaintenanceSiteOperation",element.attributes);
-             }
-            }else{
-              document.getElementById(caller == "search" ? "Data_Container_By_Search" : "Data_Container_By_Select").innerHTML += `
-              <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
-              No Maintenance Site Operation Found
-              </button>`
-            }
-
-
-          }).catch(function (error) {
-            // Handle errors
-            console.error("Error performing query:", error);
-          });
-          // Execute the query
-          featureLayerOutagesData.queryFeatures(queryParamsForMaintenanceAndOutagesData)
-          .then(function (result) {
-            // Handle the query result
-            if (result.features.length > 0) {
-              document.getElementById(caller == "search" ? "Data_Container_By_Search" : "Data_Container_By_Select").innerHTML += `
-              <div class="accordion-item">
-              <h2 class="accordion-header" id="headingThree">
-                <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                  Outages Data
-                </button>
-              </h2>
-              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                <div class="accordion-body" id=${caller == "search" ? "collapseThreeBodySearch" : "collapseThreeBodySelect"}>
-                </div>
-              </div>
-            </div>
-              `
-               for (let index = 0; index < result.features.length; index++) {
-                 const element = result.features[index];
-                 var clearanceTimeDateObj = new Date(element.attributes.clearance_time);
-                 var closeTimeDateObj = new Date(element.attributes.close_time);
-                 document.getElementById(caller == "search" ? "collapseThreeBodySearch" : "collapseThreeBodySelect").innerHTML += `
-                <table  class="mt-3 table table-striped table-bordered">
-                <thead>
-                  <th colspan="2">Incident ID: ${element.attributes.incident_id ? element.attributes.incident_id : " "}</th>
-                </thead>
-              <tbody>
-                <tr>
-                  <th>Affected Sector: </th>
-                  <td> ${element.attributes.affected_sector ? element.attributes.affected_sector : " "}</td>
-                </tr>
-                <tr>
-                  <th>Affectedobject: </th>
-                  <td> ${element.attributes.affectedobject ? element.attributes.affectedobject : " "}</td>
-                </tr>
-                <tr>
-                  <th>Alarm Number: </th>
-                  <td> ${element.attributes.alarm_number ? element.attributes.alarm_number : " "}</td>
-                </tr>
-                <tr>
-                  <th>Alarm Severity: </th>
-                  <td> ${element.attributes.alarm_severity ? element.attributes.alarm_severity : " "}</td>
-                </tr>
-                <tr>
-                  <th>Assignment: </th>
-                  <td> ${element.attributes.assignment ? element.attributes.assignment : " "}</td>
-                </tr>
-                <tr>
-                  <th>Cell ID: </th>
-                  <td> ${element.attributes.cell_id ? element.attributes.cell_id : " "}</td>
-                </tr>
-                <tr>
-                  <th>Clearance Time: </th>
-                  <td> ${clearanceTimeDateObj ? clearanceTimeDateObj.toUTCString() : " "}</td>
-                </tr>
-                <tr>
-                  <th>Close Time: </th>
-                  <td> ${closeTimeDateObj ? closeTimeDateObj.toUTCString() : " "}</td>
-                </tr>
-                <tr>
-                  <th>Cluster: </th>
-                  <td> ${element.attributes.cluster ? element.attributes.cluster : " "}</td>
-                </tr>
-                <tr>
-                  <th>Duration: </th>
-                  <td> ${element.attributes.duration ? element.attributes.duration : " "}</td>
-                </tr>
-                <tr>
-                  <th>Element: </th>
-                  <td> ${element.attributes.element ? element.attributes.element : " "}</td>
-                </tr>
-                <tr>
-                  <th>Incident ID: </th>
-                  <td> ${element.attributes.incident_id ? element.attributes.incident_id : " "}</td>
-                </tr>
-                <tr>
-                  <th>Kpi Category: </th>
-                  <td> ${element.attributes.kpi_category ? element.attributes.kpi_category : " "}</td>
-                </tr>
-                <tr>
-                  <th>Kpi Subcategory: </th>
-                  <td> ${element.attributes.kpi_subcategory ? element.attributes.kpi_subcategory : " "}</td>
-                </tr>
-                <tr>
-                  <th>NE Name: </th>
-                  <td> ${element.attributes.ne_name ? element.attributes.ne_name : " "}</td>
-                </tr>
-                <tr>
-                  <th>Notification ID: </th>
-                  <td> ${element.attributes.notification_id ? element.attributes.notification_id : " "}</td>
-                </tr>
-                <tr>
-                  <th>Open Time: </th>
-                  <td> ${element.attributes.open_time ? element.attributes.open_time : " "}</td>
-                </tr>
-                <tr>
-                  <th>Original_event Time: </th>
-                  <td> ${element.attributes.original_event_time ? element.attributes.original_event_time : " "}</td>
-                </tr>
-                <tr>
-                  <th>Problem Category: </th>
-                  <td> ${element.attributes.problem_category ? element.attributes.problem_category : " "}</td>
-                </tr>
-                <tr>
-                  <th>Province City: </th>
-                  <td> ${element.attributes.province_city ? element.attributes.province_city : " "}</td>
-                </tr>
-                <tr>
-                  <th>Reason: </th>
-                  <td> ${element.attributes.reason ? element.attributes.reason : " "}</td>
-                </tr>
-                <tr>
-                  <th>Resolution: </th>
-                  <td> ${element.attributes.resolution ? element.attributes.resolution : " "}</td>
-                </tr>
-                <tr>
-                  <th>Resolution Code: </th>
-                  <td> ${element.attributes.resolution_code ? element.attributes.resolution_code : " "}</td>
-                </tr>
-                <tr>
-                  <th>Service Affected: </th>
-                  <td> ${element.attributes.service_affected ? element.attributes.service_affected : " "}</td>
-                </tr>
-                <tr>
-                  <th>Site ID: </th>
-                  <td> ${element.attributes.site_id ? element.attributes.site_id : " "}</td>
-                </tr>
-                <tr>
-                  <th>Site Name: </th>
-                  <td> ${element.attributes.site_name ? element.attributes.site_name : " "}</td>
-                </tr>
-                <tr>
-                  <th>Status: </th>
-                  <td> ${element.attributes.status ? element.attributes.status : " "}</td>
-                </tr>
-                <tr>
-                  <th>Update Time: </th>
-                  <td> ${element.attributes.update_time ? element.attributes.update_time : " "}</td>
-                </tr>
-              </tbody>
-            </table>
-              `
-                 // console.log("OutagesData",element.attributes);
-               }
-            }else{
-              document.getElementById(caller == "search" ? "Data_Container_By_Search" : "Data_Container_By_Select").innerHTML += `
-              <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
-              No Outages Data Found
-              </button>`
-            }
-
-          }).catch(function (error) {
-            // Handle errors
-            console.error("Error performing query:", error);
-          });
-          CCTicketsFCExportFeatures.queryFeatures(queryParamsRFIAndCCTickets)
-          .then(function (result) {
-            // Check if features are available
-            if (result && result.features) {
-              // Get the total number of features
-              var count = result.features.length;
-              console.log("Total number of features:", count);
-              // Display the count wherever you want
-              document.getElementById("totalCCTickets").innerText = count;
-            } else {
-              console.error("Error: No features found in the result.");
-              document.getElementById("totalCCTickets").innerText = 0;
-            }
-          }).catch(function (error) {
-            console.error("Error querying features:", error);
-          });
-          RFIsFC.queryFeatures(queryParamsRFIAndCCTickets)
-          .then(function (result) {
-            // Check if features are available
-            if (result && result.features) {
-              // Get the total number of features
-              var count = result.features.length;
-              console.log("Total number of features:", count);
-              // Display the count wherever you want
-              document.getElementById("totalRFI").innerText = count;
-            } else {
-              console.error("Error: No features found in the result.");
-              document.getElementById("totalRFI").innerText = 0;
-            }
-          }).catch(function (error) {
-            console.error("Error querying features:", error);
-          });
-
-
-      } else {
-        document.getElementById("totalRFI").innerText = 0;
-        document.getElementById("totalCCTickets").innerText = 0;
-        ChartRFIA(1, "Affected_Service", "chart-RFIAffected");
-        ChartRFIA(1, "SUBCATEGORY", "chart-RFISubcategory");
-        ChartRFIA(1, "PRODUCT_TYPE", "chart-RFIPRODUCTTYPE");
-        ChartCCTickets(1, "affected_service", "chart-CCTicketsAffected");
-        ChartCCTickets(1, "subcategory", "chart-CCTicketsSubcategory");
-        ChartCCTickets(1, "area", "chart-CCTicketsArea");
-        if (caller == "search") {
-          document.getElementById("Data_Container_By_Search").innerHTML = `<h3 style="color:gray"> No Data Found </h3>`
-        } else if (caller == "select_on_map") {
-          document.getElementById("Data_Container_By_Select").innerHTML = `<h3 style="color:gray"> No Data Found </h3>`
-        }
-      }
-    }
-
-    // ========================================charts==============================================
-
-    // const layerHPSM = map.layers.getItemAt(6);
-    // const layerRFI = map.layers.getItemAt(8)
-    // const layerCCTickets = map.layers.getItemAt(9)
-
-    // console.log(layer);
-    // await HPSMTickets.load();
-    await RFIsFC.load();
-    await CCTicketsFCExportFeatures.load();
-    // let layerViewHPSM = await view.whenLayerView(HPSMTickets);
-    // let layerRFIView = await view.whenLayerView(RFIsFC);
-    // let layerCCTicketsView = await view.whenLayerView(CCTicketsFCExportFeatures);
-
-
-    // prepare data for total Tickets by time of day chart
-    let charts = [], hourData = [], hourLabels = [];
-
-    // Tickets by time of day chart
-    // run stats query to return total number of Tickets by time of day
-    // stats results will be grouped by the time of day
-    const hourResult = await runQuery("1=1", "extract(hour from sd_open_time)");
-    for (let feature of hourResult.features) {
-      hourData.push(feature.attributes["count"]);
-      // console.log(feature);
-      // hourLabels.push(feature.attributes["EXPR_1"]+2>12?(feature.attributes["EXPR_1"]+2)-12:feature.attributes["EXPR_1"]+2);
-      let hourInIraq = (feature.attributes["EXPR_1"]); // Ensure it wraps around if exceeding 24 hours
-      hourLabels.push(hourInIraq);
-    }
-
-    // create a bar chart showing total number of Tickets by time of day
-    updateChart("chart-day", hourData, hourLabels, false, 100);
-
-    // Tickets by time by months
-    // run stats query to return total number of Tickets by months
-    let monthData = [];
-    let monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthResult = await runQuery("1=1", "extract(month from sd_open_time)");
-    for (let feature of monthResult.features) {
-      // console.log(feature.attributes["count"]);
-      monthData.push(feature.attributes["count"]);
-    }
-
-    // create a bar chart showing total number of Tickets by months
-    updateChart("chart-month", monthData, monthLabels, false, 50);
-    // run stats query to return total number of Tickets by week days
-    let weekData = [];
-
-    // Tickets by days of week
-    // week day labels are used for the total number of Tickets by week days
-    const weekLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    // create a bar chart showing total number of Tickets by week days
-    updateChart("chart-week", weekData, weekLabels, false, 50);
-
-    let SDStatusData = [], SDStatusLabels = [];
-    // Tickets by time of day chart
-    // run stats query to return total number of Tickets by time of day
-    // stats results will be grouped by the time of day
-    const SDStatusResult = await runHPSM("1=1", "sd_status");
-    // for (let feature of SDStatusResult.features) {
-    //   SDStatusData.push(feature.attributes["count"]);
-    //   // console.log(feature.attributes);
-    //   SDStatusLabels.push(feature.attributes["sd_status"]);
-    // }
-
-    Object.keys(SDStatusResult).forEach(key => {
-      const value = SDStatusResult[key];
-      SDStatusData.push(value);
-      SDStatusLabels.push(key);
-    });
-
-    // create a bar chart showing total number of Tickets by time of day
-    updateChart("chart-SDStatus", SDStatusData, SDStatusLabels, false, 50);
-
-
-    async function ChartRFIA(cgi, fieldName, contenar) {
-      console.log("test");
-      let RFIData = [], RFILabels = [];
-      // Tickets by time of day chart
-      // run stats query to return total number of Tickets by time of day
-      // stats results will be grouped by the time of day
-      const RFIResult = await runRFIQuery(cgi, fieldName);
-      // for (let feature of RFIResult.features) {
-      // for (let feature of RFIResult) {
-      //   RFIData.push(feature.attributes["count"]);
-      //   // console.log(feature.attributes);
-      //   RFILabels.push(feature.attributes[fieldName]);
-      // }
-      Object.keys(RFIResult).forEach(key => {
-        const value = RFIResult[key];
-        RFIData.push(value);
-        RFILabels.push(key);
-      });
-
-      // create a bar chart showing total number of Tickets by time of day
-      updatePieChart(contenar, RFIData, RFILabels, false, 50);
-    }
-    async function ChartCCTickets(cgi, fieldName, contenar) {
-      console.log("test");
-      let CCTicketsData = [], CCTicketsLabels = [];
-      // Tickets by time of day chart
-      // run stats query to return total number of Tickets by time of day
-      // stats results will be grouped by the time of day
-      const CCTicketsResult = await runCCTicketsQuery(cgi, fieldName);
-      // for (let feature of CCTicketsResult) {
-      //   CCTicketsData.push(feature.attributes["count"]);
-      //   // console.log(feature.attributes);
-      //   CCTicketsLabels.push(feature.attributes[fieldName]);
-      // }
-      Object.keys(CCTicketsResult).forEach(key => {
-        const value = CCTicketsResult[key];
-        CCTicketsData.push(value);
-        CCTicketsLabels.push(key);
-      });
-
-      // create a bar chart showing total number of Tickets by time of day
-      updateChart(contenar, CCTicketsData, CCTicketsLabels, false, 50);
-    }
-
-    ChartRFIA(0, "Affected_Service", "chart-RFIAffected");
-    ChartRFIA(0, "SUBCATEGORY", "chart-RFISubcategory");
-    ChartRFIA(0, "PRODUCT_TYPE", "chart-RFIPRODUCTTYPE");
-    ChartCCTickets(0, "affected_service", "chart-CCTicketsAffected");
-    ChartCCTickets(0, "subcategory", "chart-CCTicketsSubcategory");
-    ChartCCTickets(0, "area", "chart-CCTicketsArea");
-
-    let SUBCATEGORYData = [], SUBCATEGORYLabels = [];
-    // Tickets by time of day chart
-    // run stats query to return total number of Tickets by time of day
-    // stats results will be grouped by the time of day
-    const SUBCATEGORYResult = await runHPSM("1=1", "subcategory");
-    // for (let feature of SUBCATEGORYResult.features) {
-    //   SUBCATEGORYData.push(feature.attributes["count"]);
-    //   // console.log(feature.attributes);
-    //   SUBCATEGORYLabels.push(feature.attributes["subcategory"]);
-    // }
-
-    Object.keys(SUBCATEGORYResult).forEach(key => {
-      const value = SUBCATEGORYResult[key];
-      SUBCATEGORYData.push(value);
-      SUBCATEGORYLabels.push(key);
-    });
-
-    // create a bar chart showing total number of Tickets by time of day
-    updatePieChart("chart-subcategory", SUBCATEGORYData, SUBCATEGORYLabels, false, 50);
-
-
-    let dayDistributionChart = updateChart("chart-day-distribution", [], hourLabels, true, 50);
-
-    // this function is called 3 times when the app loads and generates
-    // count stats for Tickets 1. by time of day 2. by day of week and 3. by month
-    async function runQuery(where, groupStats) {
-      // create a query object that honors the layer settings
-      const currentDate = new Date();
-
-      // Calculate date and time 24 hours ago
-      const twentyFourHoursAgo = new Date(currentDate - 24 * 60 * 60 * 1000);
-      console.log(twentyFourHoursAgo.toISOString());
-
-      let query = HPSMTickets.createQuery();
-      query.where = `sd_open_time >= '${twentyFourHoursAgo.toISOString()}'`;
-      query.outStatistics = [
-        {
-          statisticType: "count",
-          onStatisticField: "*",
-          outStatisticFieldName: "count"
-        }
-      ];
-      query.groupByFieldsForStatistics = [groupStats];
-      query.orderByFields = [groupStats];
-      let result = await HPSMTickets.queryFeatures(query);
-      return result;
-    }
-    async function runHPSM(where, groupStats) {
-      // create a query object that honors the layer settings
-      // let query = HPSMTickets.createQuery();
-      const currentDate = new Date();
-
-      // Calculate date and time 24 hours ago
-      const twentyFourHoursAgo = new Date(currentDate - 24 * 60 * 60 * 1000);
-      console.log(twentyFourHoursAgo.toISOString());
-      // AND cgi = 'BAG0400'
-      // if (cgi) {
-      //   query.where = `Creation_Date_Time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'`;
-      // } else {
-      //   query.where = `Creation_Date_Time >= '${twentyFourHoursAgo.toISOString()}'`;
-      // }
-      // query.outStatistics = [
-      //   {
-      //     statisticType: "count",
-      //     onStatisticField: "*",
-      //     outStatisticFieldName: "count"
-      //   }
-      // ];
-      // query.groupByFieldsForStatistics = [groupStats];
-      // query.orderByFields = [groupStats];
-
-
-      // let result = await RFIsFC.queryFeatures(query);
-
-      // const top1Subcategories = result.features.slice(0, 10)
-      // console.log("top1Subcategories", top1Subcategories);
-
-      //======================================================= by top 10 records ===================================
-
-      const queryParams = {
-        where: `sd_open_time >= '${twentyFourHoursAgo.toISOString()}'`, // Specify your query parameters
-        outFields: '*', // Specify the fields you want to retrieve
-        returnGeometry: true,
-        orderByFields: "sd_open_time DESC",
-        // resultRecordCount: 1,
-      };
-      let resultQuery = await HPSMTickets.queryFeatures(queryParams);
-      const top10features = resultQuery.features.slice(0, 10)
-
-      const subcategoryCounts = {};
-      top10features.forEach(function (feature) {
-        const subcategory = feature.attributes[groupStats]; // Assuming your subcategory field is 'Subcategory'
-        if (subcategory in subcategoryCounts) {
-          subcategoryCounts[subcategory]++;
-        } else {
-          subcategoryCounts[subcategory] = 1;
-        }
-      });
-
-      // 4. Sort subcategories by ticket count
-      const sortedSubcategories = Object.keys(subcategoryCounts).sort(function (a, b) {
-        return subcategoryCounts[b] - subcategoryCounts[a];
-      });
-
-      const top10Subcategories = sortedSubcategories.slice(0, 10);
-
-      const subcategoryCounts2 = {};
-
-      top10Subcategories.forEach(function (feature) {
-
-        subcategoryCounts2[feature] = subcategoryCounts[feature]
-
-      })
-
-      return subcategoryCounts2;
-    }
-    async function runRFIQuery(cgi, groupStats) {
-      // create a query object that honors the layer settings
-      let query = RFIsFC.createQuery();
-      const currentDate = new Date();
-
-      // Calculate date and time 24 hours ago
-      const twentyFourHoursAgo = new Date(currentDate - 24 * 60 * 60 * 1000);
-      console.log(twentyFourHoursAgo.toISOString());
-      // AND cgi = 'BAG0400'
-      if (cgi) {
-        query.where = `Creation_Date_Time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'`;
-      } else {
-        query.where = `Creation_Date_Time >= '${twentyFourHoursAgo.toISOString()}'`;
-      }
-      query.outStatistics = [
-        {
-          statisticType: "count",
-          onStatisticField: "*",
-          outStatisticFieldName: "count"
-        }
-      ];
-      query.groupByFieldsForStatistics = [groupStats];
-      query.orderByFields = [groupStats];
-
-
-      let result = await RFIsFC.queryFeatures(query);
-
-      const top1Subcategories = result.features.slice(0, 10)
-      console.log("top1Subcategories", top1Subcategories);
-
-      //======================================================= by top 10 records ===================================
-
-      const queryParams = {
-        where: cgi ? `Creation_Date_Time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'` : `Creation_Date_Time >= '${twentyFourHoursAgo.toISOString()}'`, // Specify your query parameters
-        outFields: '*', // Specify the fields you want to retrieve
-        returnGeometry: true,
-        orderByFields: "Creation_Date_Time DESC",
-        // resultRecordCount: 1,
-      };
-      let resultQuery = await RFIsFC.queryFeatures(queryParams);
-      const top10features = resultQuery.features.slice(0, 10)
-
-      const subcategoryCounts = {};
-      top10features.forEach(function (feature) {
-        const subcategory = feature.attributes[groupStats]; // Assuming your subcategory field is 'Subcategory'
-        if (subcategory in subcategoryCounts) {
-          subcategoryCounts[subcategory]++;
-        } else {
-          subcategoryCounts[subcategory] = 1;
-        }
-      });
-
-      // 4. Sort subcategories by ticket count
-      const sortedSubcategories = Object.keys(subcategoryCounts).sort(function (a, b) {
-        return subcategoryCounts[b] - subcategoryCounts[a];
-      });
-
-      const top10Subcategories = sortedSubcategories.slice(0, 10);
-
-      const subcategoryCounts2 = {};
-
-      top10Subcategories.forEach(function (feature) {
-
-        subcategoryCounts2[feature] = subcategoryCounts[feature]
-
-      })
-
-      return subcategoryCounts2;
-    }
-
-    async function runCCTicketsQuery(cgi, groupStats) {
-      // create a query object that honors the layer settings
-      let query = CCTicketsFCExportFeatures.createQuery();
-      const currentDate = new Date();
-
-      // Calculate date and time 24 hours ago
-      const twentyFourHoursAgo = new Date(currentDate - 24 * 60 * 60 * 1000);
-      console.log(twentyFourHoursAgo.toISOString());
-      // AND cgi = 'BAG0400'
-      if (cgi) {
-        query.where = `problem_time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'`;
-      } else {
-        query.where = `problem_time >= '${twentyFourHoursAgo.toISOString()}'`;
-      }
-      query.outStatistics = [
-        {
-          statisticType: "count",
-          onStatisticField: "*",
-          outStatisticFieldName: "count"
-        }
-      ];
-      query.groupByFieldsForStatistics = [groupStats];
-      query.orderByFields = [groupStats];
-
-      let result = await CCTicketsFCExportFeatures.queryFeatures(query);
-
-      const top1Subcategories = result.features.slice(0, 10)
-
-      console.log("top1Subcategories", top1Subcategories);
-
-      //======================================================= by top 10 records ===================================
-
-      const queryParams = {
-        where: cgi ? `problem_time >= '${twentyFourHoursAgo.toISOString()}' AND cgi = '${cgi}'` : `sd_open_time >= '${twentyFourHoursAgo.toISOString()}'`, // Specify your query parameters
-        outFields: '*', // Specify the fields you want to retrieve
-        returnGeometry: true,
-        orderByFields: "problem_time DESC",
-        // resultRecordCount: 1,
-      };
-      let resultQuery = await CCTicketsFCExportFeatures.queryFeatures(queryParams);
-      const top10features = resultQuery.features.slice(0, 10)
-
-      const subcategoryCounts = {};
-      top10features.forEach(function (feature) {
-        const subcategory = feature.attributes[groupStats]; // Assuming your subcategory field is 'Subcategory'
-        if (subcategory in subcategoryCounts) {
-          subcategoryCounts[subcategory]++;
-        } else {
-          subcategoryCounts[subcategory] = 1;
-        }
-      });
-
-      // 4. Sort subcategories by ticket count
-      const sortedSubcategories = Object.keys(subcategoryCounts).sort(function (a, b) {
-        return subcategoryCounts[b] - subcategoryCounts[a];
-      });
-
-      const top10Subcategories = sortedSubcategories.slice(0, 10);
-
-      const subcategoryCounts2 = {};
-
-      top10Subcategories.forEach(function (feature) {
-
-        subcategoryCounts2[feature] = subcategoryCounts[feature]
-
-      })
-
-      return subcategoryCounts2;
-
-    }
-    
-
-    // Keeps track of a selected bar on monthly or week day chart
-    // We use this info to toggle the clicked bar color
-    let previouslySelectedBarIndex = null;
-
-    // this function is called when user hover the mouse over Tickets charts.
-    // Tickets layer view feature effect will be updated to highlight features
-    // that fall within the selected time, week day or month
-    async function applyFilterToTicketsData(event, chart) {
-      const activePoints = chart.getElementsAtEvent(event);
-      // user did not click on a bar. stop here.
-      console.log("event", event);
-      console.log("chart", chart);
-      console.log(activePoints);
-      if (activePoints.length == 0) {
-        return;
-      }
-      const chartData = activePoints[0]["_chart"].config.data;
-      const idx = activePoints[0]["_index"];
-
-      // There is a selected bar already. Clear up the previous selection before applying a new change
-      if (previouslySelectedBarIndex >= 0) {
-        // change the bar color back to blue
-        if (event.target.id != "chart-subcategory") {
-          // console.log('in',event.target.id);
-
-          // changeBarColor(chart, previouslySelectedBarIndex, "#007AC2");
-        }
-        // clear the feature effect and reset the previous index
-        if (previouslySelectedBarIndex === idx) {
-          previouslySelectedBarIndex = null;
-          // layerViewHPSM.featureEffect = undefined;
-          // layerCCTicketsView.featureEffect = undefined;
-
-          if (dayDistributionChart) {
-            dayDistributionChart.data.datasets[0].data = [];
-            dayDistributionChart.update();
-            dayChartBreakDownBlock.heading = "Click on the graph bar to see hourly chart";
-          }
-          return;
-        }
-      }
-
-      // feature effect will be applied based on the chart bar user clicked on
-      if (activePoints[0]) {
-        const label = chartData.labels[idx];
-
-        if (event.target.id != "chart-subcategory") {
-          // console.log('in if',event.target.id);
-          // changeBarColor(chart, idx, "red");
-        }
-        previouslySelectedBarIndex = idx;
-        let where;
-        // apply effect to Tickets happened during the selected hour
-        console.log(event.target.id);
-        if (event.target.id == "chart-dayCanvas") {
-          const queryValue = label;
-          where = `extract(hour from sd_open_time) = ${queryValue}`;
-          // console.log(where);
-        } else if (event.target.id == "chart-monthCanvas") {
-
-          // apply effect to Tickets happened during the selected month
-          const queryValue = monthLabels.indexOf(label) + 1;
-          where = `extract(month from sd_open_time) = ${queryValue}`;
-          const title = "Tickets by days in " + label;
-          // dayDistributionStats(where, "extract(day from sd_open_time)", title);
-        } else if (event.target.id == "chart-SDStatusCanvas") {
-          // apply effect to Tickets happened during the selected month
-          const queryValue = label;
-          where = `sd_status = '${queryValue}'`;
-        } else if (event.target.id == "chart-subcategoryCanvas") {
-          // apply effect to Tickets happened during the selected month
-          const queryValue = label;
-          where = `subcategory = '${queryValue}'`;
-        } else if (event.target.id == "chart-weekCanvas") {
-          // apply effect to Tickets happened during the selected week day
-          const queryValue = weekLabels.indexOf(label) + 1;
-          where = `sd_open_time = ${queryValue}`;
-          where = `DAY_WEEK = ${queryValue}`;
-          const title = "Tickets by hours on " + label;
-          // dayDistributionStats(where, "extract(hour from sd_open_time)", title);
-        }
-        // layerViewHPSM.featureEffect = {
-        //   filter: {
-        //     where
-        //   },
-        //   excludedEffect: "blur(2px) opacity(0) grayscale(0.2)"
-        // };
-        // layerCCTicketsView.featureEffect = {
-        //   filter: {
-        //     where
-        //   },
-        //   excludedEffect: "blur(2px) opacity(0) grayscale(0.2)"
-        // };
-      }
-    }
-
-    async function dayDistributionStats(where, groupStats, label) {
-      const result = await runQuery(where, groupStats);
-      let chartData = [], chartLabels = [];
-
-      for (let feature of result.features) {
-        chartData.push(feature.attributes["count"]);
-        chartLabels.push(feature.attributes["EXPR_1"]);
-      }
-
-      if (dayChartBreakDownBlock.style.display === "none") {
-        dayChartBreakDownBlock.style.display = "block";
-      }
-
-      dayChartBreakDownBlock.heading = label;
-      dayDistributionChart.data.datasets[0].data = chartData;
-      dayDistributionChart.data.labels = chartLabels;
-
-      const backgroundColors = Array(chartData.length).fill("#007AC2");
-      dayDistributionChart.data.datasets[0].backgroundColor = backgroundColors;
-      dayDistributionChart.update();
-    }
-
-    // called from applyFilterToTicketsData function to update the clicked bar color
-    function changeBarColor(chart, index, color) {
-      chart.data.datasets[0].backgroundColor[index] = color;
-      chart.update();
-    }
-    //=============================== update sunday ==========================
-    // UI controls visible in the upper right panel
-    let activeGraph = "day";
-    const chartChoiceControl = document.getElementById("type-chips");
-    // const chartBlock = document.getElementById("chart-block");
-    const chartDay = document.getElementById("chart-day");
-    const chartWeek = document.getElementById("chart-week");
-    const chartMonth = document.getElementById("chart-month");
-    const dayChartBreakDownBlock = document.getElementById("chart-day-distribution");
-
-    // Show the corresponding chart when user clicks one of the three buttons
-    chartChoiceControl?.addEventListener("calciteChipGroupSelect", (event) => {
-      // clear feature effect on the layer view and clicked bar chart
-      for (let chart of charts) {
-        // changeBarColor(chart, previouslySelectedBarIndex, "#007AC2");
-      }
-      // layerCCTicketsView.featureEffect = undefined;
-      // layerViewHPSM.featureEffect = undefined;
-      previouslySelectedBarIndex = null;
-      // dayChartBreakDownBlock.style.display = "none";
-      chartDay.style.display = "none";
-      chartWeek.style.display = "none";
-      chartMonth.style.display = "none";
-      switch (event.target.selectedItems[0].value) {
-        case "day":
-          // chartBlock.heading = "Total Tickets by time of day";
-          chartDay.style.display = "block";
-          break;
-        case "week":
-          // chartBlock.heading = "Total Tickets by day of week";
-          chartWeek.style.display = "block";
-          break;
-        case "month":
-          // chartBlock.heading = "Total Tickets by month";
-          chartMonth.style.display = "block";
-        default:
-      }
-    }
-    );
-
-    // this function is called when the app loads. It creates three charts showing
-    // total Tickets by time of day, by day of the week and months
-
-    function updatePieChart(canvas, data, labels, remove, max) {
-      const canvasElement = document.getElementById(canvas);
-      const child = document.getElementById(canvas + 'Canvas')
-      if (child) {
-        canvasElement.removeChild(child);
-      }
-      const canvas2 = document.createElement("canvas")
-      canvas2.classList.add = 'canvas'
-      canvas2.id = canvas + 'Canvas'
-      canvas2.width = '400'
-      canvas2.height = '300'
-      canvasElement.appendChild(canvas2)
-      // Get the canvas element and render the chart in it
-      let chart = new Chart(canvas2.getContext("2d"), {
-        type: "doughnut",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              backgroundColor: [
-                "#9e549c",
-                "#f789d8",
-                "#149dcf",
-                "#ed5050",
-                "#ffde3e",
-                "#a6c736",
-                "#b7804a",
-                "#fc9220",
-                "#9e9e9e"
-              ],
-              data: data
-            }
-          ]
-        },
-        options: {
-          responsive: false,
-          cutoutPercentage: 0,
-          legend: {
-            position: "bottom"
-          },
-          title: {
-            display: true,
-            text: ""
-          }
-        },
-        size: 50
-      });
-      if (!remove) {
-        charts.push(chart);
-        // add mouse-move event listener on the charts so that we can display features
-        // corresponding to the selected by on the chart
-        canvas2.addEventListener("click", async () => {
-          const data = await applyFilterToTicketsData(event, chart);
-        });
-      }
-
-      return chart;
-    }
-
-    function updateChart(canvas, data, labels, remove, max) {
-
-      const backgroundColors = Array(data.length).fill("#007AC2");
-      const canvasElement = document.getElementById(canvas);
-      const child = document.getElementById(canvas + 'Canvas')
-      if (child) {
-        canvasElement.removeChild(child);
-      }
-      const canvas2 = document.createElement("canvas")
-      canvas2.classList.add = 'canvas'
-      canvas2.id = canvas + 'Canvas'
-      canvas2.width = '400'
-      canvas2.height = '270'
-      canvasElement.appendChild(canvas2)
-      // Get the canvas element and render the chart in it
-      let chart = new Chart(canvas2.getContext("2d"), {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              backgroundColor: backgroundColors,
-              data: data
-            }
-          ]
-        },
-        options: {
-          responsive: false,
-          legend: {
-            display: false
-          },
-          scales: {
-            yAxes: [
-              {
-                ticks: {
-                  beginAtZero: true,
-                  max: max
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableOutagesData.highlightIds.includes(objectId)) {
+                  featureTableOutagesData.highlightIds.add(objectId);
                 }
+                const clearanceTimeDateObj = new Date(element.attributes.clearance_time);
+                const closeTimeDateObj = new Date(element.attributes.close_time);
+                document.getElementById("collapseThreeBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">Incident ID: ${element.attributes.incident_id ? element.attributes.incident_id : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>Affected Sector: </th>
+               <td> ${element.attributes.affected_sector ? element.attributes.affected_sector : " "}</td>
+             </tr>
+             <tr>
+               <th>Affectedobject: </th>
+               <td> ${element.attributes.affectedobject ? element.attributes.affectedobject : " "}</td>
+             </tr>
+             <tr>
+               <th>Alarm Number: </th>
+               <td> ${element.attributes.alarm_number ? element.attributes.alarm_number : " "}</td>
+             </tr>
+             <tr>
+               <th>Alarm Severity: </th>
+               <td> ${element.attributes.alarm_severity ? element.attributes.alarm_severity : " "}</td>
+             </tr>
+             <tr>
+               <th>Assignment: </th>
+               <td> ${element.attributes.assignment ? element.attributes.assignment : " "}</td>
+             </tr>
+         
+             <tr>
+               <th>Clearance Time: </th>
+               <td> ${clearanceTimeDateObj ? clearanceTimeDateObj.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>Close Time: </th>
+               <td> ${closeTimeDateObj ? closeTimeDateObj.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>Cluster: </th>
+               <td> ${element.attributes.cluster ? element.attributes.cluster : " "}</td>
+             </tr>
+             <tr>
+               <th>Duration: </th>
+               <td> ${element.attributes.duration ? element.attributes.duration : " "}</td>
+             </tr>
+             <tr>
+               <th>Element: </th>
+               <td> ${element.attributes.element ? element.attributes.element : " "}</td>
+             </tr>
+             <tr>
+               <th>Incident ID: </th>
+               <td> ${element.attributes.incident_id ? element.attributes.incident_id : " "}</td>
+             </tr>
+             <tr>
+               <th>Kpi Category: </th>
+               <td> ${element.attributes.kpi_category ? element.attributes.kpi_category : " "}</td>
+             </tr>
+             <tr>
+               <th>Kpi Subcategory: </th>
+               <td> ${element.attributes.kpi_subcategory ? element.attributes.kpi_subcategory : " "}</td>
+             </tr>
+             <tr>
+               <th>NE Name: </th>
+               <td> ${element.attributes.ne_name ? element.attributes.ne_name : " "}</td>
+             </tr>
+             <tr>
+               <th>Notification ID: </th>
+               <td> ${element.attributes.notification_id ? element.attributes.notification_id : " "}</td>
+             </tr>
+             <tr>
+               <th>Open Time: </th>
+               <td> ${element.attributes.open_time ? element.attributes.open_time : " "}</td>
+             </tr>
+             <tr>
+               <th>Original_event Time: </th>
+               <td> ${element.attributes.original_event_time ? element.attributes.original_event_time : " "}</td>
+             </tr>
+             <tr>
+               <th>Problem Category: </th>
+               <td> ${element.attributes.problem_category ? element.attributes.problem_category : " "}</td>
+             </tr>
+             <tr>
+               <th>Province City: </th>
+               <td> ${element.attributes.province_city ? element.attributes.province_city : " "}</td>
+             </tr>
+             <tr>
+               <th>Reason: </th>
+               <td> ${element.attributes.reason ? element.attributes.reason : " "}</td>
+             </tr>
+             <tr>
+               <th>Resolution: </th>
+               <td> ${element.attributes.resolution ? element.attributes.resolution : " "}</td>
+             </tr>
+             <tr>
+               <th>Resolution Code: </th>
+               <td> ${element.attributes.resolution_code ? element.attributes.resolution_code : " "}</td>
+             </tr>
+             <tr>
+               <th>Service Affected: </th>
+               <td> ${element.attributes.service_affected ? element.attributes.service_affected : " "}</td>
+             </tr>
+             <tr>
+               <th>Site ID: </th>
+               <td> ${element.attributes.site_id ? element.attributes.site_id : " "}</td>
+             </tr>
+             <tr>
+               <th>Site Name: </th>
+               <td> ${element.attributes.site_name ? element.attributes.site_name : " "}</td>
+             </tr>
+             <tr>
+               <th>Status: </th>
+               <td> ${element.attributes.status ? element.attributes.status : " "}</td>
+             </tr>
+             <tr>
+               <th>Update Time: </th>
+               <td> ${element.attributes.update_time ? element.attributes.update_time : " "}</td>
+             </tr>
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
               }
-            ]
-          },
-          tooltips: {
-            displayColors: false,
-            callbacks: {
-              label: (tooltipItem, data) => {
-                const total =
-                  data.datasets[tooltipItem.datasetIndex].data[
-                  tooltipItem.index
-                  ];
-                return (
-                  data.labels[tooltipItem.index] +
-                  " - Total Tickets: " +
-                  total
-                );
-              }
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No Outages Found
+            </button>`
             }
-          }
-        }
-      });
-      if (!remove) {
-        charts.push(chart);
-        // add mouse-move event listener on the charts so that we can display features
-        // corresponding to the selected by on the chart
-        canvas2.addEventListener("click", async () => {
-          const data = await applyFilterToTicketsData(event, chart);
-        });
-      }
+          })
+          .catch(function (error) {
+            // Handle errors
+            console.error("Error performing query:", error);
+          });
 
-      return chart;
-    }
-
-
-    // =========================================================== tables ========================================
-
-    // Create the feature table
-    const featureTableSites = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: sitesFinal,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: true
-        }
-      },
-
-      container: document.getElementById("tableDiv-Sites")
-    });
-
-    const featureTableHPSMTickets = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: HPSMTickets,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: true
-        }
-      },
-      container: document.getElementById("tableDiv-HPSMTickets")
-    });
-
-    const featureTableMaintenanceSiteOperation = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: featureLayerMaintenanceSiteOperation,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: false
-        }
-      },
-
-      container: document.getElementById("tableDiv-MaintenanceSiteOperation")
-    });
-
-    const featureTableOutagesData = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: featureLayerOutagesData,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: false
-        }
-      },
-
-      container: document.getElementById("tableDiv-OutagesData")
-    });
-
-    // const featureTableNetworkCoverage = new FeatureTable({
-    //   view: view, // Required for feature highlight to work
-    //   layer: NetworkCoverage,
-    //   visibleElements: {
-    //     // Autocast to VisibleElements
-    //     menuItems: {
-    //       clearSelection: true,
-
-    //       refreshData: true,
-    //       toggleColumns: true,
-    //       selectedRecordsShowAllToggle: true,
-    //       selectedRecordsShowSelectedToggle: true,
-    //       zoomToSelection: true
-    //     }
-    //   },
-
-    //   container: document.getElementById("tableDiv-NetworkCoverage")
-    // });
-
-    const featureTableRFIsFC = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: RFIsFC,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: true
-        }
-      },
-        tableTemplate: {
-           // Autocast to TableTemplate
-           columnTemplates: [
-             // Takes an array of FieldColumnTemplate and GroupColumnTemplate
-         
-              {
-                type: "OBJECTID",
-                fieldName: "OBJECTID",
-                label: "OBJECTID"
-              },
-              {
-                type: "field",
-                fieldName: "Creation_Date_Time",
-                label: "Creation_Date_Time",
-                direction: "desc"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Interaction_ID",
-                label: "Interaction_ID"
-              },
-              {
-                type: "field",
-                fieldName: "Category",
-                label: "Category"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Affected_Service",
-                label: "Affected_Service"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "User_ID",
-                label: "User_ID"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "User_Name",
-                label: "User_Name"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "User_Location",
-                label: "User_Location"
-              }
-              ,
+        CCTicketsFCExportFeatures.queryFeatures(queryCC)
+          .then(function (result) {
+            if (result.features.length > 0) {
+              // Handle the query result
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingCCTickets">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCCTickets" aria-expanded="false" aria-controls="collapseCCTickets">
+             CC Tickets
+             </button>
+           </h2>
+           <div id="collapseCCTickets" class="accordion-collapse collapse" aria-labelledby="headingCCTickets" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseCCTicketsBodySelect"}>
+             </div>
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableCCTickets.highlightIds.includes(objectId)) {
+                  featureTableCCTickets.highlightIds.add(objectId);
+                }
+                let sdOpenTime = new Date(element.attributes.sd_open_time);
+                let SD = new Date(element.attributes.sd);
+                let imOpenTime = new Date(element.attributes.im_open_time);
+                let sdCloseTime = new Date(element.attributes.sd_close_time);
+                let sdResolutionTime = new Date(element.attributes.sd_resolution_time);
+                let problemTime = new Date(element.attributes.problem_time);
+                document.getElementById("collapseCCTicketsBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">CGI: ${element.attributes.cgi ? element.attributes.cgi : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>IM ID: </th>
+               <td> ${element.attributes.im_id ? element.attributes.im_id : " "}</td>
+             </tr>
+             <tr>
+               <th>SD ID: </th>
+               <td> ${element.attributes.sd_id ? element.attributes.sd_id : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Group: </th>
+               <td> ${element.attributes.im_group ? element.attributes.im_group : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Open Time: </th>
+               <td> ${sdOpenTime ? sdOpenTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Opened By: </th>
+               <td> ${element.attributes.sd_opened_by ? element.attributes.sd_opened_by : " "}</td>
+             </tr>
+             <tr>
+               <th>SD: </th>
+               <td> ${SD ? SD.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Opened By: </th>
+               <td> ${element.attributes.im_opened_by ? element.attributes.im_opened_by : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Status: </th>
+               <td> ${element.attributes.sd_status ? element.attributes.sd_status : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Status: </th>
+               <td> ${element.attributes.im__status ? element.attributes.im__status : " "}</td>
+             </tr>
+             <tr>
+               <th>IM Open Time: </th>
+               <td> ${imOpenTime ? imOpenTime.toUTCString() : " "}</td>
+             </tr>
           
-              {
-                type: "field",
-                fieldName: "Balance",
-                label: "Balance"
+             <tr>
+               <th>Subcategory: </th>
+               <td> ${element.attributes.subcategory ? element.attributes.subcategory : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Close Time: </th>
+               <td> ${sdCloseTime ? sdCloseTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>SD Resolution Time: </th>
+               <td> ${sdResolutionTime ? sdResolutionTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>Problem Time: </th>
+               <td> ${problemTime ? problemTime.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+             <th>cc slt: </th>
+             <td> ${element.attributes.cc_slt ? element.attributes.cc_slt : " "}</td>
+           </tr>
+             <tr>
+             <th>Cemu Ola Status: </th>
+             <td> ${element.attributes.cemu_ola_status ? element.attributes.cemu_ola_status : " "}</td>
+           </tr>
+             <tr>
+             <th>General Outages: </th>
+             <td> ${element.attributes.general_outage ? element.attributes.general_outage : " "}</td>
+            </tr>
+             <tr>
+             <th>Sla Status: </th>
+             <td> ${element.attributes.sla_status ? element.attributes.sla_status : " "}</td>
+            </tr>
+             <tr>
+             <th>Affected Service: </th>
+             <td> ${element.attributes.affected_service ? element.attributes.affected_service : " "}</td>
+            </tr>
+             <tr>
+             <th>Gouvernorate: </th>
+             <td> ${element.attributes.gouvernorate ? element.attributes.gouvernorate : " "}</td>
+            </tr>
+             <tr>
+             <th>Resolution: </th>
+             <td> ${element.attributes.resolution ? element.attributes.resolution : " "}</td>
+            </tr>
+             <tr>
+             <th>Asia Bscs Rate Plan: </th>
+             <td> ${element.attributes.asia_bscs_rate_plan ? element.attributes.asia_bscs_rate_plan : " "}</td>
+            </tr>
+             <tr>
+             <th>Asia Bscs Balance: </th>
+             <td> ${element.attributes.asia_bscs_balance ? element.attributes.asia_bscs_balance : " "}</td>
+            </tr>
+             <tr>
+             <th>Resolution Code: </th>
+             <td> ${element.attributes.resolution_code ? element.attributes.resolution_code : " "}</td>
+            </tr>
+             <tr>
+             <th>Category: </th>
+             <td> ${element.attributes.category ? element.attributes.category : " "}</td>
+            </tr>
+             <tr>
+             <th>Description: </th>
+             <td> ${element.attributes.description ? element.attributes.description : " "}</td>
+            </tr>
+             <tr>
+             <th>Cemu Comment: </th>
+             <td> ${element.attributes.cemu_comment ? element.attributes.cemu_comment : " "}</td>
+            </tr>
+             <tr>
+             <th>Escalate Ticket: </th>
+             <td> ${element.attributes.escalate_ticket ? element.attributes.escalate_ticket : " "}</td>
+            </tr>
+             <tr>
+             <th>Contact Msisdn: </th>
+             <td> ${element.attributes.contact_msisdn ? element.attributes.contact_msisdn : " "}</td>
+            </tr>
+             <tr>
+             <th>Cell ID: </th>
+             <td> ${element.attributes.cell_id ? element.attributes.cell_id : " "}</td>
+            </tr>
+             <tr>
+             <th>Msisdn: </th>
+             <td> ${element.attributes.msisdn ? element.attributes.msisdn : " "}</td>
+            </tr>
+             <tr>
+             <th>Cell Name: </th>
+             <td> ${element.attributes.cell_name ? element.attributes.cell_name : " "}</td>
+            </tr>
+             <tr>
+             <th>Site ID: </th>
+             <td> ${element.attributes.siteid ? element.attributes.siteid : " "}</td>
+            </tr>
+            </tr>
+             <tr>
+             <th>Customer Segment: </th>
+             <td> ${element.attributes.customer_segment ? element.attributes.customer_segment : " "}</td>
+            </tr>
+             <tr>
+             <th>Site Name: </th>
+             <td> ${element.attributes.sitename ? element.attributes.sitename : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC: </th>
+             <td> ${element.attributes.cmc ? element.attributes.cmc : " "}</td>
+            </tr>
+             <tr>
+             <th>Reopened: </th>
+             <td> ${element.attributes.reopened ? element.attributes.reopened : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC waiting: </th>
+             <td> ${element.attributes.cmc_waiting ? element.attributes.cmc_waiting : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC ID: </th>
+             <td> ${element.attributes.cmc_id ? element.attributes.cmc_id : " "}</td>
+            </tr>
+             <tr>
+             <th>Closed By ID: </th>
+             <td> ${element.attributes.closed_by_id ? element.attributes.closed_by_id : " "}</td>
+            </tr>
+             <tr>
+             <th>Region: </th>
+             <td> ${element.attributes.region ? element.attributes.region : " "}</td>
+            </tr>
+             <tr>
+             <th>Resolve By: </th>
+             <td> ${element.attributes.resolved_by ? element.attributes.resolved_by : " "}</td>
+            </tr>
+             <tr>
+             <th>Expected Resolution Date: </th>
+             <td> ${element.attributes.expected_resolution_date ? element.attributes.expected_resolution_date : " "}</td>
+            </tr>
+             <tr>
+             <th>Auto Governorate: </th>
+             <td> ${element.attributes.auto_governorate ? element.attributes.auto_governorate : " "}</td>
+            </tr>
+             <tr>
+             <th>Channel: </th>
+             <td> ${element.attributes.channel ? element.attributes.channel : " "}</td>
+            </tr>
+             <tr>
+             <th>Phone Number: </th>
+             <td> ${element.attributes.phone_number ? element.attributes.phone_number : " "}</td>
+            </tr>
+             <tr>
+             <th>CGI: </th>
+             <td> ${element.attributes.cgi ? element.attributes.cgi : " "}</td>
+            </tr>
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
               }
-              ,
-              {
-                type: "field",
-                fieldName: "Customer_Plan",
-                label: "Customer_Plan"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Customer_Segment",
-                label: "Customer_Segment"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Ticket_Status",
-                label: "Ticket_Status"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Service_Recipient_MSISDN",
-                label: "Service_Recipient_MSISDN"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Contact_MSISDN",
-                label: "Contact_MSISDN"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Approval_Status",
-                label: "Approval_Status"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "Closure_Code",
-                label: "Closure_Code"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "PRODUCT_TYPE",
-                label: "PRODUCT_TYPE"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "CMC",
-                label: "CMC"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "CMC_Waiting",
-                label: "CMC_Waiting"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "ASIA_CMC_ID",
-                label: "ASIA_CMC_ID"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "SUBCATEGORY",
-                label: "SUBCATEGORY"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "RATE_PLAN",
-                label: "RATE_PLAN"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "AUTO_GOVERNORATE",
-                label: "AUTO_GOVERNORATE"
-              }
-              ,
-              {
-                type: "field",
-                fieldName: "cgi",
-                label: "cgi"
-              }
-              ,
-              {
-                type: "GlobalID",
-                fieldName: "GlobalID",
-                label: "GlobalID"
-              }
-           ]
-         },
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No CC Tickets Found
+            </button>`
+            }
+          })
+          .catch(function (error) {
+            // Handle errors
+            document.getElementById("Data_Container_By_Select").innerHTML += `
+             <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+             No CC Tickets Found
+             </button>`
+            console.error("Error performing query:", error);
 
-      container: document.getElementById("tableDiv-RFIsFC")
-    });
+          });
+        featureLayerNMSIncident.queryFeatures(queryNMSIncident)
+          .then(function (result) {
+            if (result.features.length > 0) {
+              // Handle the query result
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingNMSIncident">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNMSIncident" aria-expanded="false" aria-controls="collapseNMSIncident">
+             NMS Incident
+             </button>
+           </h2>
+           <div id="collapseNMSIncident" class="accordion-collapse collapse" aria-labelledby="headingNMSIncident" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseNMSIncidentBodySelect"}>
+             </div>
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
 
-    const featureTableCCTickets = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: CCTicketsFCExportFeatures,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: true
-        }
-      },
-      tableTemplate: {
-        // Autocast to TableTemplate
-        columnTemplates: [
-          // Takes an array of FieldColumnTemplate and GroupColumnTemplate
-      
-           {
-             type: "OBJECTID",
-             fieldName: "OBJECTID",
-             label: "OBJECTID"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "problem_time",
-             label: "problem_time",
-             direction: "desc"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "im_id",
-             label: "IM ID"
-           },
-           {
-             type: "field",
-             fieldName: "sd_id",
-             label: "SD ID"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "im_group",
-             label: "IM Group"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sd_open_time",
-             label: "SD OPEN_TIME"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sd_opened_by",
-             label: "SD opened By"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sd",
-             label: "SD"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "im_opened_by",
-             label: "IM OPENED_BY",
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableNMSIncident.highlightIds.includes(objectId)) {
+                  featureTableNMSIncident.highlightIds.add(objectId);
+                }
+                document.getElementById("collapseNMSIncidentBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">Site_ID: ${element.attributes.ASIA_SITEID ? element.attributes.ASIA_SITEID : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>Cell_ID: </th>
+               <td> ${element.attributes.ASIA_CELL_ID ? element.attributes.ASIA_CELL_ID : " "}</td>
+             </tr>
+             <tr>
+               <th>OPEN_TIME: </th>
+               <td> ${element.attributes.OPEN_TIME ? element.attributes.OPEN_TIME : " "}</td>
+             </tr>
+             <tr>
+               <th>CLOSE_TIME: </th>
+               <td> ${element.attributes.CLOSE_TIME ? element.attributes.CLOSE_TIME : " "}</td>
+             </tr>
+       
+             <tr>
+               <th>STATUS: </th>
+               <td> ${element.attributes.STATUS ? element.attributes.STATUS : " "}</td>
+             </tr>
         
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sd_status",
-             label: "SD Status"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "im__status",
-             label: "IM _STATUS"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "im_open_time",
-             label: "IM OPEN_TIME"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "area",
-             label: "area"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "subcategory",
-             label: "SUBCATEGORY"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sd_close_time",
-             label: "SD CLOSE_TIME"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sd_resolution_time",
-             label: "SD RESOLUTION_TIME"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cc_slt",
-             label: "CC_SLT"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cemu_ola_status",
-             label: "CEMU OLA Status"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "general_outage",
-             label: "GENERAL_OUTAGE"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sla_status",
-             label: "SLA_status"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "affected_service",
-             label: "Affected Service"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "gouvernorate",
-             label: "GOUVERNORATE"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "resolution",
-             label: "RESOLUTION"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "asia_bscs_rate_plan",
-             label: "ASIA_BSCS_RATE_PLAN"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "asia_bscs_balance",
-             label: "ASIA_BSCS_BALANCE"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "resolution_code",
-             label: "RESOLUTION_CODE"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "category",
-             label: "CATEGORY"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "description",
-             label: "DESCRIPTION"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cemu_comment",
-             label: "CEMU Comment"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "escalate_ticket",
-             label: "Escalate Ticket"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "contact_msisdn",
-             label: "CONTACT_MSISDN"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cell_id",
-             label: "CELL_ID"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "msisdn",
-             label: "MSISDN"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cell_name",
-             label: "CELL_NAME"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "siteid",
-             label: "SITEID"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "customer_segment",
-             label: "CUSTOMER_SEGMENT"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "sitename",
-             label: "SITENAME"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cmc",
-             label: "CMC"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "reopened",
-             label: "REOPENED"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cmc_waiting",
-             label: "CMC Waiting"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cmc_id",
-             label: "CMC_ID"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "closed_by_id",
-             label: "CLOSED BY ID"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "region",
-             label: "Region"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "resolved_by",
-             label: "RESOLVED_BY"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "expected_resolution_date",
-             label: "EXPECTED RESOLUTION DATE"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "auto_governorate",
-             label: "AUTO-GOVERNORATE"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "channel",
-             label: "CHANNEL"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "phone_number",
-             label: "Phone number"
-           }
-           ,
-           {
-             type: "field",
-             fieldName: "cgi",
-             label: "cgi"
-           }
-         
-           ,
-           {
-             type: "GlobalID",
-             fieldName: "GlobalID",
-             label: "GlobalID"
-           }
-        ]
-      },
+             <tr>
+               <th>OUTAGE_TYPE: </th>
+               <td> ${element.attributes.OUTAGE_TYPE ? element.attributes.OUTAGE_TYPE : " "}</td>
+             </tr>
+             <tr>
+               <th>AFFECTED_SERVICES: </th>
+               <td> ${element.attributes.AFFECTED_SERVICES ? element.attributes.AFFECTED_SERVICES : " "}</td>
+             </tr>
+             <tr>
+               <th>CATEGORY: </th>
+               <td> ${element.attributes.CATEGORY ? element.attributes.CATEGORY : " "}</td>
+             </tr>
+             <tr>
+               <th>SUBCATEGORY: </th>
+               <td> ${element.attributes.SUBCATEGORY ? element.attributes.SUBCATEGORY : " "}</td>
+             </tr>
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
+              }
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No NMS Incident Found
+            </button>`
+            }
+          })
+          .catch(function (error) {
+            // Handle errors
+            document.getElementById("Data_Container_By_Select").innerHTML += `
+             <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+             No NMS Incident Found
+             </button>`
+            console.error("Error performing query:", error);
 
-      container: document.getElementById("tableDiv-CCTicketsFC")
-    });
+          });
 
-    const featureTableJammerSites = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: Cell_Site_Data_Jammer_Sites,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: true
-        }
-      },
+        RFIsFC.queryFeatures(queryCC)
+          .then(function (result) {
+            if (result.features.length > 0) {
+              // Handle the query result
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+           <div class="accordion-item">
+           <h2 class="accordion-header" id="headingRFIs">
+             <button class="accordion-button collapsed fw-bold text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRFIs" aria-expanded="false" aria-controls="collapseRFIs">
+             RFIs
+             </button>
+           </h2>
+           <div id="collapseRFIs" class="accordion-collapse collapse" aria-labelledby="headingRFIs" data-bs-parent="#accordionExample">
+             <div class="accordion-body" id="collapseRFIsBodySelect"}>
+             </div>
+           </div>
+         </div>
+           `
+              for (let index = 0; index < result.features.length; index++) {
+                const element = result.features[index];
 
-      container: document.getElementById("tableDiv-JammerSites")
-    });
+                const objectId = element.attributes.OBJECTID;
+                if (!featureTableRFIsFC.highlightIds.includes(objectId)) {
+                  featureTableRFIsFC.highlightIds.add(objectId);
+                }
+                let Creation_Date_Time = new Date(element.attributes.Creation_Date_Time);
+                document.getElementById("collapseRFIsBodySelect").innerHTML += `
+             <table  class="mt-3 table table-striped table-bordered">
+             <thead>
+               <th colspan="2">CGI: ${element.attributes.cgi ? element.attributes.cgi : " "}</th>
+             </thead>
+           <tbody>
+             <tr>
+               <th>Interaction ID: </th>
+               <td> ${element.attributes.Interaction_ID ? element.attributes.Interaction_ID : " "}</td>
+             </tr>
+             <tr>
+               <th>Category: </th>
+               <td> ${element.attributes.Category ? element.attributes.Category : " "}</td>
+             </tr>
+             <tr>
+               <th>Affected_Service: </th>
+               <td> ${element.attributes.Affected_Service ? element.attributes.Affected_Service : " "}</td>
+             </tr>
 
-    const featureTableInterference = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: featureLayerInterference,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: false
-        }
-      },
+             <tr>
+               <th>User_ID: </th>
+               <td> ${element.attributes.User_ID ? element.attributes.User_ID : " "}</td>
+             </tr>
+             <tr>
+               <th>SD: </th>
+               <td> ${Creation_Date_Time ? Creation_Date_Time.toUTCString() : " "}</td>
+             </tr>
+             <tr>
+               <th>User_Name: </th>
+               <td> ${element.attributes.User_Name ? element.attributes.User_Name : " "}</td>
+             </tr>
+             <tr>
+               <th>User_Location: </th>
+               <td> ${element.attributes.User_Location ? element.attributes.User_Location : " "}</td>
+             </tr>
+             <tr>
+               <th>Balance: </th>
+               <td> ${element.attributes.Balance ? element.attributes.Balance : " "}</td>
+             </tr>
+             <tr>
+               <th>Customer_Plan: </th>
+               <td> ${element.attributes.Customer_Plan ? element.attributes.Customer_Plan : " "}</td>
+             </tr>
+            <tr>
+             <th>Customer_Segment: </th>
+             <td> ${element.attributes.Customer_Segment ? element.attributes.Customer_Segment : " "}</td>
+           </tr>
+             <tr>
+             <th>Ticket_Status: </th>
+             <td> ${element.attributes.Ticket_Status ? element.attributes.Ticket_Status : " "}</td>
+           </tr>
+             <tr>
+             <th>Service_Recipient_MSISDN: </th>
+             <td> ${element.attributes.Service_Recipient_MSISDN ? element.attributes.Service_Recipient_MSISDN : " "}</td>
+            </tr>
+             <tr>
+             <th>Contact_MSISDN: </th>
+             <td> ${element.attributes.Contact_MSISDN ? element.attributes.Contact_MSISDN : " "}</td>
+            </tr>
+             <tr>
+             <th>Approval_Status: </th>
+             <td> ${element.attributes.Approval_Status ? element.attributes.Approval_Status : " "}</td>
+            </tr>
+             <tr>
+             <th>Closure_Code: </th>
+             <td> ${element.attributes.Closure_Code ? element.attributes.Closure_Code : " "}</td>
+            </tr>
+             <tr>
+             <th>PRODUCT_TYPE: </th>
+             <td> ${element.attributes.PRODUCT_TYPE ? element.attributes.PRODUCT_TYPE : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC: </th>
+             <td> ${element.attributes.CMC ? element.attributes.CMC : " "}</td>
+            </tr>
+             <tr>
+             <th>CMC_Waiting: </th>
+             <td> ${element.attributes.CMC_Waiting ? element.attributes.CMC_Waiting : " "}</td>
+            </tr>
+             <tr>
+             <th>ASIA_CMC_ID </th>
+             <td> ${element.attributes.ASIA_CMC_ID ? element.attributes.ASIA_CMC_ID : " "}</td>
+            </tr>
+             <tr>
+             <th>SUBCATEGORY: </th>
+             <td> ${element.attributes.SUBCATEGORY ? element.attributes.SUBCATEGORY : " "}</td>
+            </tr>
+             <tr>
+             <th>RATE_PLAN: </th>
+             <td> ${element.attributes.RATE_PLAN ? element.attributes.RATE_PLAN : " "}</td>
+            </tr>
+             <tr>
+             <th>AUTO_GOVERNORATE: </th>
+             <td> ${element.attributes.AUTO_GOVERNORATE ? element.attributes.AUTO_GOVERNORATE : " "}</td>
+            </tr>
+           
+           </tbody>
+         </table>
+           `
+                // console.log("OutagesData",element.attributes);
+              }
+            } else {
+              document.getElementById("Data_Container_By_Select").innerHTML += `
+            <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+            No RFIs Found
+            </button>`
+            }
+          })
+          .catch(function (error) {
+            // Handle errors
+            document.getElementById("Data_Container_By_Select").innerHTML += `
+             <button class="accordion-button collapsed border fw-bold text-danger " type="button" >
+             No RFIs Found
+             </button>`
+            console.error("Error performing query:", error);
 
-      container: document.getElementById("tableDiv-Interference")
-    });
+          });
 
-    const featureTableNMSIncident = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: featureLayerNMSIncident,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: false
-        }
-      },
-
-      container: document.getElementById("tableDiv-NMSIncident")
-    });
-
-    const featureTableCells = new FeatureTable({
-      view: view, // Required for feature highlight to work
-      layer: Cells,
-      visibleElements: {
-        // Autocast to VisibleElements
-        menuItems: {
-          clearSelection: true,
-          refreshData: true,
-          toggleColumns: true,
-          selectedRecordsShowAllToggle: true,
-          selectedRecordsShowSelectedToggle: true,
-          zoomToSelection: true
-        }
-      },
-
-      container: document.getElementById("tableDiv-Cells")
-    });
+      } else {
+        document.getElementById("Data_Container_By_Select").innerHTML = `<h3 style="color:gray"> No Data Found </h3>`
+      }
+    }
 
     // Listen for when the view is stationary.
     // If true, set the table to display only the attributes
@@ -2833,8 +2596,8 @@ require([
       () => {
         // Filter out and show only the visible features in the feature table.
         featureTableSites.filterGeometry = view.extent;
-        featureTableHPSMTickets.filterGeometry = view.extent;
-        // featureTableNetworkCoverage.filterGeometry = view.extent;
+        // featureTableHPSMTickets.filterGeometry = view.extent;
+
         featureTableRFIsFC.filterGeometry = view.extent;
         featureTableCCTickets.filterGeometry = view.extent;
         featureTableJammerSites.filterGeometry = view.extent;
@@ -2850,82 +2613,38 @@ require([
     view.on("immediate-click", async (event) => {
       const response = await view.hitTest(event);
       handles.removeAll();
-      featureTableHPSMTickets.highlightIds.removeAll();
+      // featureTableHPSMTickets.highlightIds.removeAll();
       featureTableSites.highlightIds.removeAll();
-      // featureTableNetworkCoverage.highlightIds.removeAll();
+
       featureTableRFIsFC.highlightIds.removeAll();
       featureTableCCTickets.highlightIds.removeAll();
+      featureTableNMSIncident.highlightIds.removeAll();
       featureTableJammerSites.highlightIds.removeAll();
       featureTableCells.highlightIds.removeAll();
       featureTableOutagesData.highlightIds.removeAll();
-      gitTotalAllRFIAndCCTickets()
-      ChartRFIA(0, "Affected_Service", "chart-RFIAffected");
-      ChartRFIA(0, "SUBCATEGORY", "chart-RFISubcategory");
-      ChartRFIA(0, "PRODUCT_TYPE", "chart-RFIPRODUCTTYPE");
-      ChartCCTickets(0, "affected_service", "chart-CCTicketsAffected");
-      ChartCCTickets(0, "subcategory", "chart-CCTicketsSubcategory");
-      ChartCCTickets(0, "area", "chart-CCTicketsArea");
+
       candidate = response.results.find((result) => {
         if (result.graphic.layer === sitesFinal) {
           return result.graphic &&
             result.graphic.layer &&
             result.graphic.layer === sitesFinal
         }
-        // else if (result.graphic.layer === HPSMTickets) {
-        //   return result.graphic &&
-        //     result.graphic.layer &&
-        //     result.graphic.layer === HPSMTickets
 
-        // }
-        // else if (result.graphic.layer === RFIsFC) {
-        //   return result.graphic &&
-        //     result.graphic.layer &&
-        //     result.graphic.layer === RFIsFC
-
-        // }
         else if (result.graphic.layer === Cell_Site_Data_Jammer_Sites) {
           return result.graphic &&
             result.graphic.layer &&
             result.graphic.layer === Cell_Site_Data_Jammer_Sites
 
         }
-        // else if (result.graphic.layer === NetworkCoverage) {
-        //   return result.graphic &&
-        //     result.graphic.layer &&
-        //     result.graphic.layer === NetworkCoverage
 
-        // }
-        // else if (result.graphic.layer === CCTicketsFCExportFeatures) {
-        //   return result.graphic &&
-        //     result.graphic.layer &&
-        //     result.graphic.layer === CCTicketsFCExportFeatures
-
-        // }
         else if (result.graphic.layer === Cells) {
           return result.graphic &&
             result.graphic.layer &&
             result.graphic.layer === Cells
 
         }
-        // else if (result.graphic.layer === FiberIssues_WFL1) {
-        //   return result.graphic &&
-        //     result.graphic.layer &&
-        //     result.graphic.layer === FiberIssues_WFL1
 
-        // }
 
-        // else if (result.graphic.layer === CoveragebyRSRP_85_CoveragebyRSRP_44_85) {
-        //   return result.graphic &&
-        //     result.graphic.layer &&
-        //     result.graphic.layer === CoveragebyRSRP_85_CoveragebyRSRP_44_85
-
-        // }
-        // else if (result.graphic.layer === NetworkArea) {
-        //   return result.graphic &&
-        //     result.graphic.layer &&
-        //     result.graphic.layer === NetworkArea
-
-        // }
         else if (result.graphic.layer === Governerate) {
           return result.graphic &&
             result.graphic.layer &&
@@ -2939,7 +2658,7 @@ require([
       // Check that the featureTableSites.highlightIds collection
       // does not include an already highlighted feature.
       if (candidate) {
-        console.log("candidate.graphic : ", candidate.layer.title);
+        // console.log("candidate.graphic : ", candidate.layer.title);
         const objectId = candidate.graphic.getObjectId();
         if (candidate.layer.title == sitesFinalTitle) {
 
@@ -2951,19 +2670,24 @@ require([
             featureTableSites.highlightIds.add(objectId);
             // Add this feature to the featureTableSites highlightIds collection
           }
+          // console.log("candidate", candidate);
+          const queryParams = {
+            where: `OBJECTID = ${objectId}`, // Specify your query criteria
+            outFields: ["*"] // Specify the fields you want to retrieve
+          };
+
+          sitesFinal.queryFeatures(queryParams)
+            .then(function (result) {
+              if (result.features.length > 0) {
+                getSitesFeatureLayer(result.features[0].attributes.site_id)
+              }
+            })
+            .catch(function (error) {
+              // Handle errors
+              console.error("Error performing query:", error);
+            });
         }
-        // else if (candidate.layer.title == HPSMTicketsTitle) {
 
-
-        //   if (featureTableHPSMTickets.highlightIds.includes(objectId)) {
-        //     // Remove feature from current selection if feature
-        //     // is already added to highlightIds collection
-        //     featureTableHPSMTickets.highlightIds.remove(objectId);
-        //   } else {
-            
-        //     featureTableHPSMTickets.highlightIds.add(objectId);
-        //   }
-        // }
         else if (candidate.layer.title == CellsTitle) {
 
 
@@ -2972,46 +2696,29 @@ require([
             // is already added to highlightIds collection
             featureTableCells.highlightIds.remove(objectId);
           } else {
-            
+
             featureTableCells.highlightIds.add(objectId);
           }
+          console.log("candidate", candidate);
+          const queryParams = {
+            where: `OBJECTID = ${objectId}`, // Specify your query criteria
+            outFields: ["*"] // Specify the fields you want to retrieve
+          };
+
+          Cells.queryFeatures(queryParams)
+            .then(function (result) {
+              if (result.features.length > 0) {
+
+                getCellsFeatureLayer(result.features[0].attributes.CELLID, result.features[0].attributes.UNIQUEID)
+              }
+            })
+            .catch(function (error) {
+              // Handle errors
+              console.error("Error performing query:", error);
+            });
         }
-        // else if (candidate.layer.title == NetworkCoverageTitle) {
 
 
-        //   if (featureTableNetworkCoverage.highlightIds.includes(objectId)) {
-        //     // Remove feature from current selection if feature
-        //     // is already added to highlightIds collection
-        //     featureTableNetworkCoverage.highlightIds.remove(objectId);
-        //   } else {
-        //     
-        //     featureTableNetworkCoverage.highlightIds.add(objectId);
-        //   }
-        // }
-        // else if (candidate.layer.title == RFIsFCTitle) {
-
-
-        //   if (featureTableRFIsFC.highlightIds.includes(objectId)) {
-        //     // Remove feature from current selection if feature
-        //     // is already added to highlightIds collection
-        //     featureTableRFIsFC.highlightIds.remove(objectId);
-        //   } else {
-            
-        //     featureTableRFIsFC.highlightIds.add(objectId);
-        //   }
-        // }
-        // else if (candidate.layer.title == CCTicketsFCExportFeaturesTitle) {
-
-
-        //   if (featureTableCCTickets.highlightIds.includes(objectId)) {
-        //     // Remove feature from current selection if feature
-        //     // is already added to highlightIds collection
-        //     featureTableCCTickets.highlightIds.remove(objectId);
-        //   } else {
-            
-        //     featureTableCCTickets.highlightIds.add(objectId);
-        //   }
-        // }
         else if (candidate.layer.title == Cell_Site_Data_Jammer_SitesTitle) {
 
 
@@ -3020,7 +2727,7 @@ require([
             // is already added to highlightIds collection
             featureTableJammerSites.highlightIds.remove(objectId);
           } else {
-            
+
             featureTableJammerSites.highlightIds.add(objectId);
           }
         }
@@ -3033,638 +2740,1453 @@ require([
             });
           }
         }
-        // else if (candidate.layer.title == CoveragebyRSRP_85_CoveragebyRSRP_44_85Title) {
-        //   if (candidate.graphic.layer.type === "feature") {
-        //     layerViews.forEach((layerView) => {
-        //       if (candidate.graphic.layer.title === layerView.layer.title) {
-        //         handles.add(layerView.highlight(candidate.graphic));
-        //       }
-        //     });
-        //   }
-        // }
-        // else if (candidate.layer.title == NetworkAreaTitle) {
-        //   if (candidate.graphic.layer.type === "feature") {
-        //     layerViews.forEach((layerView) => {
-        //       if (candidate.graphic.layer.title === layerView.layer.title) {
-        //         handles.add(layerView.highlight(candidate.graphic));
-        //       }
-        //     });
-        //   }
-        // }
-        // else if (candidate.layer.title == FiberIssues_WFL1Title) {
-        //   if (candidate.graphic.layer.type === "feature") {
-        //     layerViews.forEach((layerView) => {
-        //       if (candidate.graphic.layer.title === layerView.layer.title) {
-        //         handles.add(layerView.highlight(candidate.graphic));
-        //       }
-        //     });
-        //   }
-        // }
+
       }
     });
 
     // Watch the featureTableSites's highlightIds.length property,
     // and get the count of highlighted features within
     // the table.
+    ////////////////////////// get CCAffectedService list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseCCAffectedService = await CCTicketsFCExportFeatures.queryFeatures();
 
+      // Extract all values from the query response
+      const allCCAffectedServiceValues = allValuesResponseCCAffectedService.features.map(feature => feature.attributes.affected_service);
+
+      // Filter out duplicate values locally
+      const uniquCCAffectedServiceValues = [...new Set(allCCAffectedServiceValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputCCAffectedService = document.getElementById("SearchInputAffectedService");
+      autocompleteInputCCAffectedService.setAttribute("list", "AffectedServiceList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("AffectedServiceList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "AffectedServiceList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniquCCAffectedServiceValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching CCAffectedService values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    ////////////////////////// get CCSubcategory list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseCCSubcategory = await CCTicketsFCExportFeatures.queryFeatures();
+
+      // Extract all values from the query response
+      const allCCSubcategoryValues = allValuesResponseCCSubcategory.features.map(feature => feature.attributes.subcategory);
+
+      // Filter out duplicate values locally
+      const uniquCCSubcategoryValues = [...new Set(allCCSubcategoryValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputCCSubcategory = document.getElementById("SearchInputCCSubcategory");
+      autocompleteInputCCSubcategory.setAttribute("list", "CCSubcategoryList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("CCSubcategoryList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "CCSubcategoryList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniquCCSubcategoryValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching CCSubcategory values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
+
+    ////////////////////////// get CCArea list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseCCArea = await CCTicketsFCExportFeatures.queryFeatures();
+
+      // Extract all values from the query response
+      const allCCAreaValues = allValuesResponseCCArea.features.map(feature => feature.attributes.areaa);
+
+      // Filter out duplicate values locally
+      const uniquCCAreaValues = [...new Set(allCCAreaValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputCCArea = document.getElementById("SearchInputCCArea");
+      autocompleteInputCCArea.setAttribute("list", "CCAreaList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("CCAreaList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "CCAreaList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniquCCAreaValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching CCSubcategory values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // Add an event listener to the first input list to filter the second input list
+    document.getElementById("SearchInputAffectedService").addEventListener("input", async function () {
+      try {
+        const allValuesResponseCCSubcategory = await CCTicketsFCExportFeatures.queryFeatures();
+        const selectedAffectedService = this.value; // Get the selected value
+        if (selectedAffectedService) {
+          const filteredCCSubcategoryValues = allValuesResponseCCSubcategory.features
+            .filter(feature => feature.attributes.affected_service === selectedAffectedService) // Filter by the selected value
+            .map(feature => feature.attributes.subcategory); // Extract subcategory values
+
+          // Clear existing options
+          const datalist = document.getElementById("CCSubcategoryList");
+          datalist.innerHTML = '';
+
+          // Add unique filtered values to the datalist
+          const uniqueFilteredCCSubcategoryValues = [...new Set(filteredCCSubcategoryValues)];
+          uniqueFilteredCCSubcategoryValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        } else {
+          const allValuesResponseCCSubcategory = await CCTicketsFCExportFeatures.queryFeatures();
+
+          // Extract all values from the query response
+          const allCCSubcategoryValues = allValuesResponseCCSubcategory.features.map(feature => feature.attributes.subcategory);
+
+          // Filter out duplicate values locally
+          const uniquCCSubcategoryValues = [...new Set(allCCSubcategoryValues)];
+
+          // Populate autocomplete options with the unique values
+          const autocompleteInputCCSubcategory = document.getElementById("SearchInputCCSubcategory");
+          autocompleteInputCCSubcategory.setAttribute("list", "CCSubcategoryList");
+
+          // Check if datalist already exists
+          let datalist = document.getElementById("CCSubcategoryList");
+          if (!datalist) {
+            datalist = document.createElement("datalist");
+            datalist.id = "CCSubcategoryList";
+            document.body.appendChild(datalist);
+          } else {
+            // Clear existing options
+            datalist.innerHTML = '';
+          }
+
+          // Add unique values to the datalist
+          uniquCCSubcategoryValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        }
+
+      } catch (error) {
+        console.error("Error filtering CCSubcategory values:", error);
+      }
+    });
+    // Add an event listener to the first input list to filter the second input list
+    document.getElementById("SearchInputCCSubcategory").addEventListener("input", async function () {
+      try {
+        const allValuesResponseCCArea = await CCTicketsFCExportFeatures.queryFeatures();
+        const selectedCCArea = this.value; // Get the selected value
+        if (selectedCCArea) {
+          const filteredCCAreaValues = allValuesResponseCCArea.features
+            .filter(feature => feature.attributes.subcategory === selectedCCArea) // Filter by the selected value
+            .map(feature => feature.attributes.areaa); // Extract subcategory values
+
+          // Clear existing options
+          const datalist = document.getElementById("CCAreaList");
+          datalist.innerHTML = '';
+
+          // Add unique filtered values to the datalist
+          const uniqueFilteredCCAreaValues = [...new Set(filteredCCAreaValues)];
+          uniqueFilteredCCAreaValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        } else {
+          // Fetch all values for the "" field from the feature layer
+          const allValuesResponseCCArea = await CCTicketsFCExportFeatures.queryFeatures();
+
+          // Extract all values from the query response
+          const allCCAreaValues = allValuesResponseCCArea.features.map(feature => feature.attributes.areaa);
+
+          // Filter out duplicate values locally
+          const uniquCCAreaValues = [...new Set(allCCAreaValues)];
+
+          // Populate autocomplete options with the unique values
+          const autocompleteInputCCArea = document.getElementById("SearchInputCCArea");
+          autocompleteInputCCArea.setAttribute("list", "CCAreaList");
+
+          // Check if datalist already exists
+          let datalist = document.getElementById("CCAreaList");
+          if (!datalist) {
+            datalist = document.createElement("datalist");
+            datalist.id = "CCAreaList";
+            document.body.appendChild(datalist);
+          } else {
+            // Clear existing options
+            datalist.innerHTML = '';
+          }
+
+          // Add unique values to the datalist
+          uniquCCAreaValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        }
+
+      } catch (error) {
+        console.error("Error filtering CCArea values:", error);
+      }
+    });
+
+    ////////////////////////// get RFIProductType list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseRFIProductType = await RFIsFC.queryFeatures(
+        //   {
+        //   where :'PRODUCT_TYPE IS NOT NULL'
+        // }
+      );
+
+      // Extract all values from the query response
+      const allRFIProductTypeValues = allValuesResponseRFIProductType.features.map(feature => feature.attributes.PRODUCT_TYPE);
+
+      // Filter out duplicate values locally
+      const uniquRFIProductTypeValues = [...new Set(allRFIProductTypeValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputRFIProductType = document.getElementById("SearchInputProductType");
+      autocompleteInputRFIProductType.setAttribute("list", "RFIProductTypeList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("RFIProductTypeList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "RFIProductTypeList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniquRFIProductTypeValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching RFIProductType values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    ////////////////////////// get RFIsSubcategory list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseRFIsSubcategory = await RFIsFC.queryFeatures(
+        //   {
+        //   where :'SUBCATEGORY IS NOT NULL'
+        // }
+      );
+
+      // Extract all values from the query response
+      const allRFIsSubcategoryValues = allValuesResponseRFIsSubcategory.features.map(feature => feature.attributes.SUBCATEGORY);
+
+      // Filter out duplicate values locally
+      const uniqeRFIsSubcategoryValues = [...new Set(allRFIsSubcategoryValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputRFIsSubcategory = document.getElementById("SearchInputRFIsSubcategory");
+      autocompleteInputRFIsSubcategory.setAttribute("list", "RFIsSubcategoryList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("RFIsSubcategoryList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "RFIsSubcategoryList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniqeRFIsSubcategoryValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching RFIsSubcategory values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    ////////////////////////// get RFIsArea list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseRFIsArea = await RFIsFC.queryFeatures(
+        //   {
+        //   where :'SUBCATEGORY IS NOT NULL'
+        // }
+      );
+
+      // Extract all values from the query response
+      const allRFIsAreaValues = allValuesResponseRFIsArea.features.map(feature => feature.attributes.Affected_Service);
+
+      // Filter out duplicate values locally
+      const uniqeRFIsAreaValues = [...new Set(allRFIsAreaValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputRFIsArea = document.getElementById("SearchInputRFIsArea");
+      autocompleteInputRFIsArea.setAttribute("list", "RFIsAreaList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("RFIsAreaList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "RFIsAreaList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniqeRFIsAreaValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching RFIsArea values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // Add an event listener to the first input list to filter the second input list
+    document.getElementById("SearchInputProductType").addEventListener("input", async function () {
+      try {
+        const allValuesResponseRFIsSubcategory = await RFIsFC.queryFeatures();
+        const selectedRFIsProductType = this.value; // Get the selected value
+        if (selectedRFIsProductType) {
+          const filteredRFIsSubcategoryValues = allValuesResponseRFIsSubcategory.features
+            .filter(feature => feature.attributes.PRODUCT_TYPE === selectedRFIsProductType) // Filter by the selected value
+            .map(feature => feature.attributes.SUBCATEGORY); // Extract subcategory values
+
+          // Clear existing options
+          const datalist = document.getElementById("RFIsSubcategoryList");
+          datalist.innerHTML = '';
+
+          // Add unique filtered values to the datalist
+          const uniqueFilteredRFIsSubcategoryValues = [...new Set(filteredRFIsSubcategoryValues)];
+          uniqueFilteredRFIsSubcategoryValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        } else {
+          // Fetch all values for the "" field from the feature layer
+          const allValuesResponseRFIsSubcategory = await RFIsFC.queryFeatures(
+            //   {
+            //   where :'SUBCATEGORY IS NOT NULL'
+            // }
+          );
+
+          // Extract all values from the query response
+          const allRFIsSubcategoryValues = allValuesResponseRFIsSubcategory.features.map(feature => feature.attributes.SUBCATEGORY);
+
+          // Filter out duplicate values locally
+          const uniqeRFIsSubcategoryValues = [...new Set(allRFIsSubcategoryValues)];
+
+          // Populate autocomplete options with the unique values
+          const autocompleteInputRFIsSubcategory = document.getElementById("SearchInputRFIsSubcategory");
+          autocompleteInputRFIsSubcategory.setAttribute("list", "RFIsSubcategoryList");
+
+          // Check if datalist already exists
+          let datalist = document.getElementById("RFIsSubcategoryList");
+          if (!datalist) {
+            datalist = document.createElement("datalist");
+            datalist.id = "RFIsSubcategoryList";
+            document.body.appendChild(datalist);
+          } else {
+            // Clear existing options
+            datalist.innerHTML = '';
+          }
+
+          // Add unique values to the datalist
+          uniqeRFIsSubcategoryValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        }
+
+      } catch (error) {
+        console.error("Error filtering CCSubcategory values:", error);
+      }
+    });
+    // Add an event listener to the first input list to filter the second input list
+    document.getElementById("SearchInputRFIsSubcategory").addEventListener("input", async function () {
+      try {
+        const allValuesResponseRFIsArea = await RFIsFC.queryFeatures();
+        const selectedRFIsSubcategory = this.value; // Get the selected value
+        if (selectedRFIsSubcategory) {
+          const filteredRFIsAreaValues = allValuesResponseRFIsArea.features
+            .filter(feature => feature.attributes.SUBCATEGORY === selectedRFIsSubcategory) // Filter by the selected value
+            .map(feature => feature.attributes.Affected_Service); // Extract subcategory values
+
+          // Clear existing options
+          const datalist = document.getElementById("RFIsAreaList");
+          datalist.innerHTML = '';
+
+          // Add unique filtered values to the datalist
+          const uniqueFilteredRFIsAreaValues = [...new Set(filteredRFIsAreaValues)];
+          uniqueFilteredRFIsAreaValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        } else {
+          const allValuesResponseRFIsArea = await RFIsFC.queryFeatures(
+            //   {
+            //   where :'SUBCATEGORY IS NOT NULL'
+            // }
+          );
+
+          // Extract all values from the query response
+          const allRFIsAreaValues = allValuesResponseRFIsArea.features.map(feature => feature.attributes.Affected_Service);
+
+          // Filter out duplicate values locally
+          const uniqeRFIsAreaValues = [...new Set(allRFIsAreaValues)];
+
+          // Populate autocomplete options with the unique values
+          const autocompleteInputRFIsArea = document.getElementById("SearchInputRFIsArea");
+          autocompleteInputRFIsArea.setAttribute("list", "RFIsAreaList");
+
+          // Check if datalist already exists
+          let datalist = document.getElementById("RFIsAreaList");
+          if (!datalist) {
+            datalist = document.createElement("datalist");
+            datalist.id = "RFIsAreaList";
+            document.body.appendChild(datalist);
+          } else {
+            // Clear existing options
+            datalist.innerHTML = '';
+          }
+
+          // Add unique values to the datalist
+          uniqeRFIsAreaValues.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            datalist.appendChild(option);
+          });
+        }
+
+      } catch (error) {
+        console.error("Error filtering CCArea values:", error);
+      }
+    });
+    ////////////////////////// get OutagesAffectedService list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseOutagesAffectedService = await featureLayerOutagesData.queryFeatures(
+        //   {
+        //   where :'SUBCATEGORY IS NOT NULL'
+        // }
+      );
+
+      // Extract all values from the query response
+      const allOutagesAffectedServiceValues = allValuesResponseOutagesAffectedService.features.map(feature => feature.attributes.service_affected);
+
+      // Filter out duplicate values locally
+      const uniqeOutagesAffectedServiceValues = [...new Set(allOutagesAffectedServiceValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputOutagesAffectedService = document.getElementById("SearchInputOutagesAffectedService");
+      autocompleteInputOutagesAffectedService.setAttribute("list", "OutagesAffectedServiceList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("OutagesAffectedServiceList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "OutagesAffectedServiceList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniqeOutagesAffectedServiceValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching OutagesAffectedService values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    ////////////////////////// get OutagesSiteID list /////////////////////
+    try {
+      // Fetch all values for the "" field from the feature layer
+      const allValuesResponseOutagesSiteID = await featureLayerOutagesData.queryFeatures(
+        //   {
+        //   where :'SUBCATEGORY IS NOT NULL'
+        // }
+      );
+
+      // Extract all values from the query response
+      const allOutagesSiteIDValues = allValuesResponseOutagesSiteID.features.map(feature => feature.attributes.site_id);
+
+      // Filter out duplicate values locally
+      const uniqeOutagesSiteIDValues = [...new Set(allOutagesSiteIDValues)];
+
+      // Populate autocomplete options with the unique values
+      const autocompleteInputOutagesSiteID = document.getElementById("SearchInputOutagesCellID");
+      autocompleteInputOutagesSiteID.setAttribute("list", "OutagesSiteIDList");
+
+      // Check if datalist already exists
+      let datalist = document.getElementById("OutagesSiteIDList");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "OutagesSiteIDList";
+        document.body.appendChild(datalist);
+      } else {
+        // Clear existing options
+        datalist.innerHTML = '';
+      }
+
+      // Add unique values to the datalist
+      uniqeOutagesSiteIDValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        datalist.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching OutagesSiteID values:", error);
+    }
+
+    ///////////////////////////////////////////////////////////////
     const SearchInputAffectedService = document.getElementById("SearchInputAffectedService");
-    SearchInputAffectedService.addEventListener("change", async () => {
+    const buttonSearchInputAffectedService = document.getElementById("button-SearchInputAffectedService");
+    buttonSearchInputAffectedService.addEventListener("click", async () => {
       const value = SearchInputAffectedService.value;
       console.log(value);
-      // // const layer = map.layers.getItemAt(6);
-      // await CCTicketsFCExportFeatures.load();
-      // // Create an array of layerViews to be able to highlight selected features.
-      // if (CCTicketsFCExportFeatures.type === "feature") {
-
-      //   CCTicketsFCExportFeatures.definitionExpression = value === ""
-      //     ? null
-      //     : `affected_service = '${value}'`
-
-      // }
-            
       // Ensure featureTableOutagesData and featureLayerOutagesData are properly initialized
       try {
+        showLoader();
         // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `affected_service = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await CCTicketsFCExportFeatures.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-          // console.log(feature.attributes.original_event_time);
+        if (value) {
+          handles.removeAll();
+          // featureTableHPSMTickets.highlightIds.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrSites = [];
+          const arrCells = [];
           const queryParams = {
-            where: `SITEID = '${feature.attributes.cgi}'`, // Specify your query criteria
+            where: `affected_service = '${value}'`, // Specify your query criteria
             outFields: ["*"] // Specify the fields you want to retrieve
           };
-          const result = await Cells.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableCells.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableCells.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
+
+          // Query features
+          const resultCCTickets = await CCTicketsFCExportFeatures.queryFeatures(queryParams);
+
+          // Handle the query result
+          resultCCTickets.features.forEach(async (feature) => {
+            arrSites.push(feature.attributes.siteid);
+            arrCells.push(feature.attributes.cgi);
             const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
             if (!featureTableCCTickets.highlightIds.includes(objectId)) {
               // Remove feature from current selection if already highlighted
               featureTableCCTickets.highlightIds.add(objectId);
-            } 
-        });
+            }
+          });
+          if (arrCells.length > 0) {
+            // console.log(feature.attributes.original_event_time);
+            const queryParamsCells = {
+              where: "UNIQUEID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+      
+          }
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+
+          }
+        }
+
       } catch (error) {
         console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
       }
     });
 
     const SearchInputCCSubcategory = document.getElementById("SearchInputCCSubcategory");
-    SearchInputCCSubcategory.addEventListener("change", async () => {
+    const buttonSearchInputCCSubcategory = document.getElementById("button-SearchInputCCSubcategory");
+    buttonSearchInputCCSubcategory.addEventListener("click", async () => {
       const value = SearchInputCCSubcategory.value;
       console.log(value);
-      // // const layer = map.layers.getItemAt(6);
-      // await CCTicketsFCExportFeatures.load();
-      // // Create an array of layerViews to be able to highlight selected features.
-      // if (CCTicketsFCExportFeatures.type === "feature") {
-
-      //   CCTicketsFCExportFeatures.definitionExpression = value === ""
-      //     ? null
-      //     : `subcategory = '${value}'`
-
-      // }
       try {
-        // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `subcategory = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await CCTicketsFCExportFeatures.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-         
-          // console.log(feature.attributes.cgi);
+        showLoader();
+        if (value) {
+
+          // Clear existing highlights
+          handles.removeAll();
+          // featureTableHPSMTickets.highlightIds.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrSites = [];
+          const arrCells = [];
           const queryParams = {
-            
-            where: `SITEID = '${feature.attributes.cgi}'`, // Specify your query criteria
+            where: `subcategory = '${value}'`, // Specify your query criteria
             outFields: ["*"] // Specify the fields you want to retrieve
           };
-          const result = await Cells.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableCells.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableCells.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
+
+          // Query features
+          const resultCCTickets = await CCTicketsFCExportFeatures.queryFeatures(queryParams);
+
+          // Handle the query result
+          resultCCTickets.features.forEach(async (feature) => {
+            arrSites.push(feature.attributes.siteid);
+            arrCells.push(feature.attributes.cgi);
             const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
             if (!featureTableCCTickets.highlightIds.includes(objectId)) {
               // Remove feature from current selection if already highlighted
               featureTableCCTickets.highlightIds.add(objectId);
-            } 
-        });
+            }
+          });
+
+          if (arrCells.length > 0) {
+            // console.log(feature.attributes.original_event_time);
+            const queryParamsCells = {
+              where: "UNIQUEID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+      
+          }
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+          }
+        }
       } catch (error) {
         console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
       }
     });
 
     const SearchInputCCArea = document.getElementById("SearchInputCCArea");
-    SearchInputCCArea.addEventListener("change", async () => {
+    const buttonSearchInputCCArea = document.getElementById("button-SearchInputCCArea");
+    buttonSearchInputCCArea.addEventListener("click", async () => {
       const value = SearchInputCCArea.value;
       console.log(value);
-      // // const layer = map.layers.getItemAt(6);
-      // await CCTicketsFCExportFeatures.load();
-      // // Create an array of layerViews to be able to highlight selected features.
-      // if (CCTicketsFCExportFeatures.type === "feature") {
-
-      //   CCTicketsFCExportFeatures.definitionExpression = value === ""
-      //     ? null
-      //     : `area = '${value}'`
-
-      // }
-      
       try {
-        // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `area = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await CCTicketsFCExportFeatures.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-          // console.log(feature.attributes.original_event_time);
-          const queryParams = {
-            where: `SITEID = '${feature.attributes.cgi}'`, // Specify your query criteria
+        showLoader();
+        if (value) {
+          // Clear existing highlights
+          handles.removeAll();
+          // featureTableHPSMTickets.highlightIds.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrSites = [];
+          const arrCells = [];
+          const queryParamsCCTickets = {
+            where: `areaa = '${value}'`, // Specify your query criteria
             outFields: ["*"] // Specify the fields you want to retrieve
           };
-          const result = await Cells.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableCells.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableCells.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
+
+          // Query features
+          const resultCCTickets = await CCTicketsFCExportFeatures.queryFeatures(queryParamsCCTickets);
+
+          // Handle the query result
+          resultCCTickets.features.forEach(async (feature) => {
+            arrSites.push(feature.attributes.siteid);
+            arrCells.push(feature.attributes.cgi);
             const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
             if (!featureTableCCTickets.highlightIds.includes(objectId)) {
               // Remove feature from current selection if already highlighted
               featureTableCCTickets.highlightIds.add(objectId);
-            } 
-        });
+            }
+          });
+          if (arrCells.length > 0) {
+            // console.log(feature.attributes.original_event_time);
+            const queryParamsCells = {
+              where: "UNIQUEID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+      
+          }
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+          }
+        }
+
       } catch (error) {
         console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
       }
 
     });
 
     const SearchInputProductType = document.getElementById("SearchInputProductType");
-    SearchInputProductType.addEventListener("change", async () => {
+    const buttonSearchInputProductType = document.getElementById("button-SearchInputProductType");
+    buttonSearchInputProductType.addEventListener("click", async () => {
       const value = SearchInputProductType.value;
       console.log(value);
-      // // const layer = map.layers.getItemAt(6);
-      // await RFIsFC.load();
-      // // Create an array of layerViews to be able to highlight selected features.
-      // if (RFIsFC.type === "feature") {
-
-      //   RFIsFC.definitionExpression = value === ""
-      //     ? null
-      //     : `PRODUCT_TYPE = '${value}'`
-
-      // }
       try {
-        // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `PRODUCT_TYPE = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await RFIsFC.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-          // console.log(feature.attributes.original_event_time);
+        showLoader();
+        if (value) {
+          // Clear existing highlights
+          handles.removeAll();
+          // featureTableHPSMTickets.highlightIds.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrSites = [];
+          const arrCells = [];
           const queryParams = {
-            where: `SITEID = '${feature.attributes.cgi}'`, // Specify your query criteria
+            where: `PRODUCT_TYPE = '${value}'`, // Specify your query criteria
             outFields: ["*"] // Specify the fields you want to retrieve
           };
-          const result = await Cells.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableCells.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableCells.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
+
+          // Query features
+          const resultRFIsFC = await RFIsFC.queryFeatures(queryParams);
+
+          // Handle the query result
+          resultRFIsFC.features.forEach(async (feature) => {
+            arrCells.push(feature.attributes.cgi);
             const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
             if (!featureTableRFIsFC.highlightIds.includes(objectId)) {
               // Remove feature from current selection if already highlighted
               featureTableRFIsFC.highlightIds.add(objectId);
-            } 
-        });
+            }
+          });
+
+          if (arrCells.length > 0) {
+            // console.log(feature.attributes.original_event_time);
+            const queryParamsCells = {
+              where: "UNIQUEID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              arrSites.push(feature.attributes.SITEID);
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+      
+          }
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+          }
+        }
       } catch (error) {
         console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
       }
     });
 
     const SearchInputRFIsSubcategory = document.getElementById("SearchInputRFIsSubcategory");
-    SearchInputRFIsSubcategory.addEventListener("change", async () => {
+    const buttonSearchInputRFIsSubcategory = document.getElementById("button-SearchInputRFIsSubcategory");
+    buttonSearchInputRFIsSubcategory.addEventListener("click", async () => {
       const value = SearchInputRFIsSubcategory.value;
       console.log(value);
-      // // const layer = map.layers.getItemAt(6);
-      // await RFIsFC.load();
-      // // Create an array of layerViews to be able to highlight selected features.
-      // if (RFIsFC.type === "feature") {
-
-      //   RFIsFC.definitionExpression = value === ""
-      //     ? null
-      //     : `SUBCATEGORY = '${value}'`
-
-      // }
-
       try {
-        // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `SUBCATEGORY = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await RFIsFC.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-          // console.log(feature.attributes.original_event_time);
+        showLoader();
+        if (value) {
+          // Clear existing highlights
+          handles.removeAll();
+          // featureTableHPSMTickets.highlightIds.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrSites = [];
+          const arrCells = [];
           const queryParams = {
-            where: `SITEID = '${feature.attributes.cgi}'`, // Specify your query criteria
+            where: `SUBCATEGORY = '${value}'`, // Specify your query criteria
             outFields: ["*"] // Specify the fields you want to retrieve
           };
-          const result = await Cells.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableCells.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableCells.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
+
+          // Query features
+          const result = await RFIsFC.queryFeatures(queryParams);
+
+          // Handle the query result
+          result.features.forEach(async (feature) => {
+            arrCells.push(feature.attributes.cgi);
             const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
             if (!featureTableRFIsFC.highlightIds.includes(objectId)) {
               // Remove feature from current selection if already highlighted
               featureTableRFIsFC.highlightIds.add(objectId);
-            } 
-        });
+            }
+          });
+
+          if (arrCells.length > 0) {
+            // console.log(feature.attributes.original_event_time);
+            const queryParamsCells = {
+              where: "UNIQUEID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              arrSites.push(feature.attributes.SITEID);
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+      
+          }
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+          }
+        }
       } catch (error) {
         console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
       }
-
     });
 
     const SearchInputRFIsArea = document.getElementById("SearchInputRFIsArea");
-    SearchInputRFIsArea.addEventListener("change", async () => {
+    const buttonSearchInputRFIsArea = document.getElementById("button-SearchInputRFIsArea");
+    buttonSearchInputRFIsArea.addEventListener("click", async () => {
       const value = SearchInputRFIsArea.value;
       console.log(value);
-      // // const layer = map.layers.getItemAt(6);
-      // await RFIsFC.load();
-      // // Create an array of layerViews to be able to highlight selected features.
-      // if (RFIsFC.type === "feature") {
-
-      //   RFIsFC.definitionExpression = value === ""
-      //     ? null
-      //     : `User_Location = '${value}'`
-
-      // }
-
       try {
-        // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `User_Location = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await RFIsFC.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-          // console.log(feature.attributes.original_event_time);
+        showLoader();
+        if (value) {
+          // Clear existing highlights
+          handles.removeAll();
+          // featureTableHPSMTickets.highlightIds.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrSites = [];
+          const arrCells = [];
           const queryParams = {
-            where: `SITEID = '${feature.attributes.cgi}'`, // Specify your query criteria
+            where: `Affected_Service = '${value}'`, // Specify your query criteria
             outFields: ["*"] // Specify the fields you want to retrieve
           };
-          const result = await Cells.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableCells.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableCells.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
+
+          // Query features
+          const result = await RFIsFC.queryFeatures(queryParams);
+
+          // Handle the query result
+          result.features.forEach(async (feature) => {
+            arrCells.push(feature.attributes.cgi);
             const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
             if (!featureTableRFIsFC.highlightIds.includes(objectId)) {
               // Remove feature from current selection if already highlighted
               featureTableRFIsFC.highlightIds.add(objectId);
-            } 
-        });
+            }
+          });
+
+          if (arrCells.length > 0) {
+            // console.log(feature.attributes.original_event_time);
+            const queryParamsCells = {
+              where: "UNIQUEID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              arrSites.push(feature.attributes.SITEID);
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+      
+          }
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+          }
+
+        }
       } catch (error) {
         console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
       }
-
-
     });
 
     const SearchInputOutagesAffectedService = document.getElementById("SearchInputOutagesAffectedService");
-    SearchInputOutagesAffectedService.addEventListener("change", async () => {
+    const buttonSearchInputOutagesAffectedService = document.getElementById("button-SearchInputOutagesAffectedService");
+    buttonSearchInputOutagesAffectedService.addEventListener("click", async () => {
       const value = SearchInputOutagesAffectedService.value;
       console.log(value);
       // Ensure featureTableOutagesData and featureLayerOutagesData are properly initialized
       try {
-        // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `service_affected = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await featureLayerOutagesData.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-          // console.log(feature.attributes.original_event_time);
+        showLoader();
+        if (value) {
+          // Clear existing highlights
+          handles.removeAll();
+          // featureTableHPSMTickets.highlightIds.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrSites = [];
+          const arrCells = [];
           const queryParams = {
-            where: `site_id = '${feature.attributes.site_id}'`, // Specify your query criteria
+            where: `service_affected = ${value}`, // Specify your query criteria
             outFields: ["*"] // Specify the fields you want to retrieve
           };
-          const result = await sitesFinal.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableSites.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableSites.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
-            const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
-            if (featureTableOutagesData.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableOutagesData.highlightIds.remove(objectId);
-            } else {
-              featureTableOutagesData.highlightIds.add(objectId);
-            }
-          // }
-        });
-      } catch (error) {
-        console.error("Error querying features:", error);
-      }
-    });
-    const SearchInputOutagesCellID = document.getElementById("SearchInputOutagesCellID");
-    SearchInputOutagesCellID.addEventListener("change", async () => {
-      const value = SearchInputOutagesCellID.value;
-      console.log(value);
-      // Ensure featureTableOutagesData and featureLayerOutagesData are properly initialized
-      try {
-        // Clear existing highlights
-        handles.removeAll();
-        featureTableHPSMTickets.highlightIds.removeAll();
-        featureTableSites.highlightIds.removeAll();
-        // featureTableNetworkCoverage.highlightIds.removeAll();
-        featureTableRFIsFC.highlightIds.removeAll();
-        featureTableCCTickets.highlightIds.removeAll();
-        featureTableJammerSites.highlightIds.removeAll();
-        featureTableCells.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        const queryParams = {
-          where: `cell_id = '${value}'`, // Specify your query criteria
-          outFields: ["*"] // Specify the fields you want to retrieve
-        };
-    
-        // Query features
-        const result = await featureLayerOutagesData.queryFeatures(queryParams);
-        
-        // Handle the query result
-        result.features.forEach(async(feature) => {
-          // console.log(feature.attributes.original_event_time);
-          const queryParams = {
-            where: `site_id = '${feature.attributes.site_id}'`, // Specify your query criteria
-            outFields: ["*"] // Specify the fields you want to retrieve
-          };
-          const result = await sitesFinal.queryFeatures(queryParams);
-          result.features.forEach(async(feature) => {
-            const objectId = feature.attributes.OBJECTID;
-            if (!featureTableSites.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableSites.highlightIds.add(objectId);
-            } 
-          })
-          
-          // if (candidate) {
-            const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
-            if (featureTableOutagesData.highlightIds.includes(objectId)) {
-              // Remove feature from current selection if already highlighted
-              featureTableOutagesData.highlightIds.remove(objectId);
-            } else {
-              featureTableOutagesData.highlightIds.add(objectId);
-            }
-          // }
-        });
-      } catch (error) {
-        console.error("Error querying features:", error);
-      }
-    });
 
-    let Sdate; 
-    let Edate;
-
-    const SearchInputOutagesOriginalEventTimeStartDate = document.getElementById("SearchInputOutagesOriginalEventTimeStartDate");
-    SearchInputOutagesOriginalEventTimeStartDate.addEventListener("change", async () => {
-      handles.removeAll();
-      featureTableHPSMTickets.highlightIds.removeAll();
-      featureTableSites.highlightIds.removeAll();
-      // featureTableNetworkCoverage.highlightIds.removeAll();
-      featureTableRFIsFC.highlightIds.removeAll();
-      featureTableCCTickets.highlightIds.removeAll();
-      featureTableJammerSites.highlightIds.removeAll();
-      featureTableCells.highlightIds.removeAll();
-      featureTableOutagesData.highlightIds.removeAll();
-      const value = SearchInputOutagesOriginalEventTimeStartDate.value;
-      console.log(value);
-      const currentDate = new Date(value);
-      // Get the time zone offset for Cairo, Egypt (GMT+2)
-      let offset = 2 * 60 * 60 * 1000; // Convert hours to milliseconds
-  
-      // Calculate the new time by adding the offset to the current time
-      let newTime = currentDate.getTime() + offset;
-  
-      // Create a new date object with the adjusted time
-      let cairoDate = new Date(newTime);
-  
-      // Format the date as ISO string without milliseconds
-      let isoString = currentDate.toISOString().slice(0, 19); // Remove milliseconds and timezone
-      Sdate = isoString
-      console.log(isoString); // Output the ISO string format in GMT+2 (Cairo, Egypt)
-    })
-
-    const SearchInputOutagesOriginalEventTimeEndDate = document.getElementById("SearchInputOutagesOriginalEventTimeEndDate");
-    SearchInputOutagesOriginalEventTimeEndDate.addEventListener("change", async () => {
-      console.log(value);
-      const value = SearchInputOutagesOriginalEventTimeEndDate.value;
-      const currentDate = new Date(value);
-      
-      // Ensure featureTableOutagesData and featureLayerOutagesData are properly initialized
-      try {
-        // Clear existing highlights
-        featureTableSites.highlightIds.removeAll();
-        featureTableOutagesData.highlightIds.removeAll();
-    
-        // Get the time zone offset for Cairo, Egypt (GMT+2)
-        let offset = 2 * 60 * 60 * 1000; // Convert hours to milliseconds
-    
-        // Calculate the new time by adding the offset to the current time
-        let newTime = currentDate.getTime() + offset;
-    
-        // Create a new date object with the adjusted time
-        let cairoDate = new Date(newTime);
-    
-        // Format the date as ISO string without milliseconds
-        let isoString = currentDate.toISOString().slice(0, 19); // Remove milliseconds and timezone
-        
-        Edate = isoString
-
-        console.log(isoString); // Output the ISO string format in GMT+2 (Cairo, Egypt)
-
-        if ( Sdate && Edate ) {
-          
-          const queryParams = {
-            where: `original_event_time >= '${Sdate}' AND original_event_time <= '${Edate}'`, // Assuming original_event_time is a date field
-            outFields: ["*"] // Specify the fields you want to retrieve
-          };
-        
           // Query features
           const result = await featureLayerOutagesData.queryFeatures(queryParams);
-      
+
           // Handle the query result
           result.features.forEach(async (feature) => {
-            const siteId = feature.attributes.site_id;
-      
-            const siteQueryParams = {
-              where: `site_id = '${siteId}'`,
-              outFields: ["*"]
-            };
-      
-            const siteResult = await sitesFinal.queryFeatures(siteQueryParams);
-      
-            siteResult.features.forEach((siteFeature) => {
-              const objectId = siteFeature.attributes.OBJECTID;
-              if (!featureTableSites.highlightIds.includes(objectId)) {
-                featureTableSites.highlightIds.add(objectId);
-              }
-            });
-      
-            const objectId = feature.attributes.OBJECTID;
+            arrSites.push(feature.attributes.site_id);
+            arrCells.push(feature.attributes.cell_id);
+            const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
             if (featureTableOutagesData.highlightIds.includes(objectId)) {
+              // Remove feature from current selection if already highlighted
               featureTableOutagesData.highlightIds.remove(objectId);
             } else {
               featureTableOutagesData.highlightIds.add(objectId);
             }
           });
+
+          if (arrCells.length > 0) {
+            const queryParamsCells = {
+              where: "CELLID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+          }
+
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+
+          }
+
         }
       } catch (error) {
         console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
       }
     });
-    
 
-    
-    
+    const SearchInputOutagesCellID = document.getElementById("SearchInputOutagesCellID");
+    const SearchInputOutagbuttonSearchInputOutagesCellIDesCellID = document.getElementById("button-SearchInputOutagesCellID");
+    SearchInputOutagbuttonSearchInputOutagesCellIDesCellID.addEventListener("click", async () => {
+      const value = SearchInputOutagesCellID.value;
+      console.log(value);
+      // Ensure featureTableOutagesData and featureLayerOutagesData are properly initialized
+      try {
+        showLoader();
+        if (value) {
+          // Clear existing highlights
+          handles.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrCells = [];
+          const arrSites = [];
+          const queryParams = {
+            where: `site_id = '${value}'`, // Specify your query criteria
+            outFields: ["*"] // Specify the fields you want to retrieve
+          };
+
+          // Query features
+          const result = await featureLayerOutagesData.queryFeatures(queryParams);
+
+          // Handle the query result
+          result.features.forEach(async (feature) => {
+            arrSites.push(feature.attributes.site_id);
+            arrCells.push(feature.attributes.cell_id);
+            const objectId = feature.attributes.OBJECTID; // Access objectId directly from feature.attributes
+            if (featureTableOutagesData.highlightIds.includes(objectId)) {
+              // Remove feature from current selection if already highlighted
+              featureTableOutagesData.highlightIds.remove(objectId);
+            } else {
+              featureTableOutagesData.highlightIds.add(objectId);
+            }
+          });
+
+          if (arrCells.length > 0) {
+            const queryParamsCells = {
+              where: "CELLID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+          }
+
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+
+          }
+
+        }
+      } catch (error) {
+        console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
+      }
+    });
+
+    let Sdate;
+    let Edate;
+
+    const SearchInputOutagesOriginalEventTimeStartDate = document.getElementById("SearchInputOutagesOriginalEventTimeStartDate");
+    SearchInputOutagesOriginalEventTimeStartDate.addEventListener("change", async () => {
+      const value = SearchInputOutagesOriginalEventTimeStartDate.value;
+      console.log(value);
+      const currentDate = new Date(value);
+      // Get the time zone offset for Cairo, Egypt (GMT+2)
+      let offset = 2 * 60 * 60 * 1000; // Convert hours to milliseconds
+
+      // Calculate the new time by adding the offset to the current time
+      let newTime = currentDate.getTime() + offset;
+
+      // Create a new date object with the adjusted time
+      let cairoDate = new Date(newTime);
+
+      // Format the date as ISO string without milliseconds
+      let isoString = currentDate.toISOString().slice(0, 19); // Remove milliseconds and timezone
+      Sdate = currentDate
+      console.log(isoString); // Output the ISO string format in GMT+2 (Cairo, Egypt)
+    })
+
+    const SearchInputOutagesOriginalEventTimeEndDate = document.getElementById("SearchInputOutagesOriginalEventTimeEndDate");
+    SearchInputOutagesOriginalEventTimeEndDate.addEventListener("change", async () => {
+      const value = SearchInputOutagesOriginalEventTimeEndDate.value;
+      const currentDate = new Date(value);
+      console.log(value);
+ 
+         // Get the time zone offset for Cairo, Egypt (GMT+2)
+         let offset = 2 * 60 * 60 * 1000; // Convert hours to milliseconds
+ 
+         // Calculate the new time by adding the offset to the current time
+         let newTime = currentDate.getTime() + offset;
+ 
+         // Create a new date object with the adjusted time
+         let cairoDate = new Date(newTime);
+ 
+         // Format the date as ISO string without milliseconds
+         let isoString = currentDate.toISOString().slice(0, 19); // Remove milliseconds and timezone
+ 
+         Edate = currentDate
+ 
+         console.log(isoString); // Output the ISO string format in GMT+2 (Cairo, Egypt)
+    })
+
+    const buttonSearchInputOutagesOriginalEventTimeEndDate = document.getElementById("button-SearchInputOutagesOriginalEventTimeEndDate");
+    buttonSearchInputOutagesOriginalEventTimeEndDate.addEventListener("click", async () => {
+
+
+      // Ensure featureTableOutagesData and featureLayerOutagesData are properly initialized
+      try {
+        
+        showLoader();
+
+        if (Sdate && Edate) {
+          // Clear existing highlights
+          handles.removeAll();
+          featureTableSites.highlightIds.removeAll();
+          featureTableRFIsFC.highlightIds.removeAll();
+          featureTableCCTickets.highlightIds.removeAll();
+          featureTableNMSIncident.highlightIds.removeAll();
+          featureTableJammerSites.highlightIds.removeAll();
+          featureTableCells.highlightIds.removeAll();
+          featureTableOutagesData.highlightIds.removeAll();
+          const arrCells = [];
+          const arrSites = [];
+          const queryParams = {
+            where: `OBJECTID IS NOT NULL`, // Assuming original_event_time is a date field
+            outFields: ["*"] // Specify the fields you want to retrieve
+          };
+
+          // Query features
+          const result = await featureLayerOutagesData.queryFeatures(queryParams);
+
+          // Handle the query result
+          result.features.forEach(async (Outagesfeature) => {
+            if (new Date(Outagesfeature.attributes.original_event_time) <= Edate && new Date(Outagesfeature.attributes.original_event_time) >= Sdate) {
+              arrSites.push(Outagesfeature.attributes.site_id);
+              arrCells.push(Outagesfeature.attributes.cell_id);
+              const objectId = Outagesfeature.attributes.OBJECTID;
+              if (!featureTableOutagesData.highlightIds.includes(objectId)) {
+                featureTableOutagesData.highlightIds.add(objectId);
+              }
+            }
+          });
+
+          if (arrCells.length > 0) {
+            const queryParamsCells = {
+              where: "CELLID IN ('" + arrCells.join("','") + "')", // Specify your query criteria
+              outFields: ["*"],// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+            const resultCells = await Cells.queryFeatures(queryParamsCells);
+            resultCells.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableCells.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableCells.highlightIds.add(objectId);
+              }
+            })
+          }
+
+          if (arrSites.length > 0) {
+            const queryParamsSites = {
+              where: "site_id IN ('" + arrSites.join("','") + "')", // Specify your query criteria
+              outFields: ["*"] ,// Specify the fields you want to retrieve
+              returnGeometry: true,
+            };
+
+            const resultSites = await sitesFinal.queryFeatures(queryParamsSites);
+            resultSites.features.forEach(async (feature) => {
+              const objectId = feature.attributes.OBJECTID;
+              if (!featureTableSites.highlightIds.includes(objectId)) {
+                // Remove feature from current selection if already highlighted
+                featureTableSites.highlightIds.add(objectId);
+              }
+            })
+
+            // Zoom to the extent of the query result
+            if (resultSites.features.length > 0) {
+              // const extent = esri.geometry.Extent.fromJSON(result.features[0].geometry.extent);
+              console.log(resultSites.features[0]);
+              // view.goTo(extent);
+              view.goTo({
+                target: resultSites.features[0].geometry,
+                zoom: 13
+              });
+            }
+
+          }
+
+        }
+      } catch (error) {
+        console.error("Error querying features:", error);
+      } finally {
+        hideLoader();
+      }
+    });
 
     reactiveUtils.watch(
       () => featureTableSites.highlightIds.length,
@@ -3686,26 +4208,7 @@ require([
         });
       }
     );
-    // reactiveUtils.watch(
-    //   () => featureTableNetworkCoverage.highlightIds.length,
-    //   (highlightIdsCount) => {
-    //     // Iterate through the filters within the table.
-    //     // If the active filter is "Show selection",
-    //     // changes made to highlightIds (adding/removing)
-    //     // are reflected.
 
-    //     featureTableNetworkCoverage.viewModel.activeFilters.forEach((filter) => {
-    //       if (filter.type === "selection") {
-    //         selectionIdCount = filter.objectIds.length; // the filtered selection's id count
-    //         // Check that the filter selection count is equal to the
-    //         // highlightIds collection count. If not, update filter selection.
-    //         if (selectionIdCount !== highlightIdsCount) {
-    //           featureTableNetworkCoverage.filterBySelection();
-    //         }
-    //       }
-    //     });
-    //   }
-    // );
     reactiveUtils.watch(
       () => featureTableRFIsFC.highlightIds.length,
       (highlightIdsCount) => {
@@ -3726,6 +4229,7 @@ require([
         });
       }
     );
+
     reactiveUtils.watch(
       () => featureTableCCTickets.highlightIds.length,
       (highlightIdsCount) => {
@@ -3746,6 +4250,7 @@ require([
         });
       }
     );
+
     reactiveUtils.watch(
       () => featureTableJammerSites.highlightIds.length,
       (highlightIdsCount) => {
@@ -3766,26 +4271,7 @@ require([
         });
       }
     );
-    reactiveUtils.watch(
-      () => featureTableHPSMTickets.highlightIds.length,
-      (highlightIdsCount) => {
-        // Iterate through the filters within the table.
-        // If the active filter is "Show selection",
-        // changes made to highlightIds (adding/removing)
-        // are reflected.
 
-        featureTableHPSMTickets.viewModel.activeFilters.forEach((filter) => {
-          if (filter.type === "selection") {
-            selectionIdCount = filter.objectIds.length; // the filtered selection's id count
-            // Check that the filter selection count is equal to the
-            // highlightIds collection count. If not, update filter selection.
-            if (selectionIdCount !== highlightIdsCount) {
-              featureTableHPSMTickets.filterBySelection();
-            }
-          }
-        });
-      }
-    );
     reactiveUtils.watch(
       () => featureTableCells.highlightIds.length,
       (highlightIdsCount) => {
@@ -3806,9 +4292,6 @@ require([
         });
       }
     );
-
-
-
 
   })();
 });
